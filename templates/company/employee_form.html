@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ form_title|default:"Add Employee" }}{% endblock %}
+{% block page_title %}{{ form_title|default:"Add Employee" }}{% endblock %}
+
+{% block content %}
+<style>
+    .form-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        width: 100%;
+        max-width: 600px;
+        margin: 2rem auto;
+    }
+</style>
+
+<div class="form-card">
+    {% if form.errors %}
+        <ul class="text-danger">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <h2 class="text-center mb-4">{{ form_title|default:"Add New Employee" }}</h2>
+
+    <form id="employeeForm" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Basic Details -->
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" class="form-control" name="name" value="{{ form.name.value|default:'' }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" value="{{ form.email.value|default:'' }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-control" name="phone" value="{{ form.phone.value|default:'' }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Position</label>
+            <input type="text" class="form-control" name="position" value="{{ form.position.value|default:'' }}">
+        </div>
+
+        <!-- Login Details -->
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" class="form-control" name="username" value="{{ form.username.value|default:'' }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" required>
+        </div>
+
+        <!-- Bank Details -->
+        <h5 class="mt-4">Bank Details</h5>
+        <div class="mb-3">
+            <label class="form-label">Account Number</label>
+            <input type="text" class="form-control" name="account_number">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Bank Name</label>
+            <input type="text" class="form-control" name="bank_name">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">IFSC Code</label>
+            <input type="text" class="form-control" name="ifsc_code">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Branch</label>
+            <input type="text" class="form-control" name="branch">
+        </div>
+
+        <!-- Aadhaar Details -->
+        <h5 class="mt-4">Aadhaar Details</h5>
+        <div class="mb-3">
+            <label class="form-label">Aadhaar Number</label>
+            <input type="text" class="form-control" name="aadhaar_number">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Upload Aadhaar Document</label>
+            <input type="file" class="form-control" name="aadhaar_file">
+        </div>
+
+        <!-- Other Documents -->
+        <h5 class="mt-4">Other Documents</h5>
+        <div class="mb-3">
+            <label class="form-label">Upload Documents</label>
+            <input type="file" class="form-control" name="documents" multiple>
+        </div>
+                <div class="form-group">
+                        <label for="employment_status">Employment Status</label>
+                        <select name="employment_status" id="employment_status" class="form-control" required>
+                            <option value="">Select Employment Status</option>
+                            <option value="current">Full Time</option>
+                            <option value="past">Part Time</option>
+                        </select>
+                </div>
+        <!-- Submit -->
+        <div class="d-flex gap-3">
+            <button type="submit" class="btn btn-primary flex-fill">{{ submit_button_text|default:"Add Employee" }}</button>
+            <a href="{% url 'company:employees' %}" class="btn btn-outline-secondary flex-fill">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

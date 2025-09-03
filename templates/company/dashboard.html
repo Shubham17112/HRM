@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .stat-icon.teal {
+        background-color: #f0fdfa;
+        color: #14b8a6;
+    }
+
+    .stat-icon.green {
+        background-color: #f0fdf4;
+        color: #22c55e;
+    }
+
+    .stat-icon.yellow {
+        background-color: #fefce8;
+        color: #eab308;
+    }
+
+    .stat-icon.blue {
+        background-color: #eff6ff;
+        color: #3b82f6;
+    }
+
+    .stat-icon svg {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .stat-content h3 {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #64748b;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1e293b;
+        line-height: 1;
+    }
+
+    .stat-text {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #14b8a6;
+        line-height: 1;
+    }
+
+    .chart-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .activity-icon {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .activity-icon.green {
+        background-color: #f0fdf4;
+        color: #22c55e;
+    }
+
+    .activity-icon.blue {
+        background-color: #eff6ff;
+        color: #3b82f6;
+    }
+
+    .activity-icon.yellow {
+        background-color: #fefce8;
+        color: #eab308;
+    }
+
+    .activity-icon svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .activity-content p {
+        font-weight: 500;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-content span {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 0.5rem;
+        background-color: #e2e8f0;
+        border-radius: 0.25rem;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background-color: #14b8a6;
+        border-radius: 0.25rem;
+        transition: width 0.3s ease;
+    }
+</style>
+
+<div class="row g-4 mb-4">
+    <div class="col-12 col-md-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon teal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="m22 21-3-3m0 0a5.5 5.5 0 1 0-7.8-7.8 5.5 5.5 0 0 0 7.8 7.8Z"/>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <h3>Total Employees</h3>
+                <p class="stat-number">{{ employee_count|default:156 }}</p>
+            </div>
+            
+        </div>
+    </div>
+     <div class="col-12 col-md-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon teal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="m22 21-3-3m0 0a5.5 5.5 0 1 0-7.8-7.8 5.5 5.5 0 0 0 7.8 7.8Z"/>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <h3>Total Attandance </h3>
+                <p class="stat-number">{{ employee_count|default:0 }}</p>
+            </div>
+            
+        </div>
+    </div>
+     <div class="col-12 col-md-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon teal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="m22 21-3-3m0 0a5.5 5.5 0 1 0-7.8-7.8 5.5 5.5 0 0 0 7.8 7.8Z"/>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <h3>Total Employees</h3>
+                <p class="stat-number">{{ employee_count|default:156 }}</p>
+            </div>
+            
+        </div>
+    </div>
+    <!-- Add other stat cards similarly -->
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-lg-6">
+        <div class="chart-card">
+            <h3>Recent Activities</h3>
+            <div class="d-flex flex-column gap-3">
+                {% for activity in recent_activities|default:default_activities %}
+                <div class="d-flex align-items-center gap-3">
+                    <div class="activity-icon {{ activity.icon_class|default:'green' }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            {{ activity.icon_svg|default:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/>' }}
+                        </svg>
+                    </div>
+                    <div class="activity-content">
+                        <p>{{ activity.description|default:"Sarah Johnson's leave approved" }}</p>
+                        <span>{{ activity.time|default:"2 hours ago" }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="chart-card">
+            <h3>Quick Stats</h3>
+            <div class="d-flex flex-column gap-3">
+                {% for stat in quick_stats|default:default_stats %}
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>{{ stat.name|default:"Employee Satisfaction" }}</span>
+                        <span>{{ stat.value|default:"85%" }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ stat.value|default:'85%' }}"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Client-side JavaScript if needed
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add any dashboard-specific JavaScript here
+    });
+</script>
+{% endblock %}

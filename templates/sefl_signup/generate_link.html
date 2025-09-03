@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Generate Registration Link for {{ company.name }}</h3>
+<form method="post">
+  {% csrf_token %}
+  {{ form.expiry_hours.label_tag }} {{ form.expiry_hours }} <br>
+  {{ form.invited_email.label_tag }} {{ form.invited_email }} <br>
+  <button class="btn btn-primary">Generate Link</button>
+</form>
+{% endblock %}

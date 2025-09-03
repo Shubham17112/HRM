@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRFlow - HR Management Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        /* Layout */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .main-content {
+            margin-left: 0;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Sidebar Header */
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 2rem;
+            height: 2rem;
+            color: #14b8a6;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .sidebar-close {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-close:hover {
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .sidebar-close svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar-nav {
+            padding: 1.5rem 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-right: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: #f0fdfa;
+            color: #14b8a6;
+        }
+
+        .nav-item.active {
+            background-color: #f0fdfa;
+            color: #14b8a6;
+            border-right-color: #14b8a6;
+        }
+
+        .nav-item svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-toggle {
+            display: block;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+
+        .menu-toggle:hover {
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .menu-toggle svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            color: #64748b;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #fef2f2;
+            color: #dc2626;
+        }
+
+        .logout-btn svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        /* Page Content */
+        .page-content {
+            padding: 1.5rem;
+        }
+
+        .page {
+            display: block;
+        }
+
+        .page.hidden {
+            display: none;
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.teal {
+            background-color: #f0fdfa;
+            color: #14b8a6;
+        }
+
+        .stat-icon.green {
+            background-color: #f0fdf4;
+            color: #22c55e;
+        }
+
+        .stat-icon.yellow {
+            background-color: #fefce8;
+            color: #eab308;
+        }
+
+        .stat-icon.blue {
+            background-color: #eff6ff;
+            color: #3b82f6;
+        }
+
+        .stat-icon svg {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        .stat-content h3 {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748b;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1;
+        }
+
+        .stat-text {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #14b8a6;
+            line-height: 1;
+        }
+
+        /* Dashboard Charts */
+        .dashboard-charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .chart-card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        /* Activity List */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .activity-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.green {
+            background-color: #f0fdf4;
+            color: #22c55e;
+        }
+
+        .activity-icon.blue {
+            background-color: #eff6ff;
+            color: #3b82f6;
+        }
+
+        .activity-icon.yellow {
+            background-color: #fefce8;
+            color: #eab308;
+        }
+
+        .activity-icon svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .activity-content p {
+            font-weight: 500;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-content span {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        /* Progress List */
+        .progress-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .progress-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+
+        .progress-info span:first-child {
+            color: #64748b;
+        }
+
+        .progress-info span:last-child {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 0.5rem;
+            background-color: #e2e8f0;
+            border-radius: 0.25rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #14b8a6;
+            border-radius: 0.25rem;
+            transition: width 0.3s ease;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .search-filter {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 0.75rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            color: #64748b;
+        }
+
+        .search-box input {
+            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            width: 300px;
+            transition: all 0.2s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #14b8a6;
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+        }
+
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background: white;
+            color: #64748b;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .filter-btn svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background: white;
+            color: #64748b;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #14b8a6;
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background-color: #14b8a6;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0f766e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+        }
+
+        .btn-primary svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .btn-secondary {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background-color: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+            color: #1e293b;
+        }
+
+        /* Table */
+        .table-card {
+            background: white;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background-color: #f8fafc;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            color: #64748b;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .employee-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .employee-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: #f0fdfa;
+            color: #14b8a6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .employee-name {
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn.edit {
+            background-color: #f0fdfa;
+            color: #14b8a6;
+        }
+
+        .action-btn.edit:hover {
+            background-color: #ccfbf1;
+        }
+
+        .action-btn.delete {
+            background-color: #fef2f2;
+            color: #dc2626;
+        }
+
+        .action-btn.delete:hover {
+            background-color: #fee2e2;
+        }
+
+        .action-btn.approve {
+            background-color: #f0fdf4;
+            color: #22c55e;
+        }
+
+        .action-btn.approve:hover {
+            background-color: #dcfce7;
+        }
+
+        .action-btn.reject {
+            background-color: #fef2f2;
+            color: #dc2626;
+        }
+
+        .action-btn.reject:hover {
+            background-color: #fee2e2;
+        }
+
+        .action-btn svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .status-badge.pending {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-badge.approved {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.rejected {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Form */
+        .form-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 60vh;
+            padding: 2rem 0;
+        }
+
+        .form-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .form-card h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #14b8a6;
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .form-actions button {
+            flex: 1;
+        }
+
+        /* Subscription Plans */
+        .subscription-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .subscription-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .subscription-header p {
+            font-size: 1.125rem;
+            color: #64748b;
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .plan-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 2rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .plan-card.popular {
+            border-color: #14b8a6;
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(20, 184, 166, 0.2);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #14b8a6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .plan-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .plan-header h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-price {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .price {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .period {
+            font-size: 1rem;
+            color: #64748b;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .plan-features li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            color: #64748b;
+        }
+
+        .plan-features svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: #14b8a6;
+            flex-shrink: 0;
+        }
+
+        .plan-btn {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .plan-btn.current {
+            background-color: #f1f5f9;
+            color: #64748b;
+            border-color: #e2e8f0;
+        }
+
+        .plan-btn.primary {
+            background-color: #14b8a6;
+            color: white;
+        }
+
+        .plan-btn.primary:hover {
+            background-color: #0f766e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+        }
+
+        .plan-btn:not(.current):not(.primary) {
+            background-color: white;
+            color: #14b8a6;
+            border-color: #14b8a6;
+        }
+
+        .plan-btn:not(.current):not(.primary):hover {
+            background-color: #14b8a6;
+            color: white;
+        }
+
+        /* Attendance Select */
+        .attendance-select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            background: white;
+            color: #64748b;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .attendance-select:focus {
+            outline: none;
+            border-color: #14b8a6;
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            font-weight: 500;
+        }
+
+        .notification.success {
+            background: #10b981;
+            color: white;
+        }
+
+        .notification.error {
+            background: #ef4444;
+            color: white;
+        }
+
+        .notification.info {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* Responsive Design */
+        @media (min-width: 1024px) {
+            .sidebar {
+                position: relative;
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 280px;
+            }
+
+            .menu-toggle {
+                display: none;
+            }
+
+            .sidebar-close {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1023px) {
+            .sidebar-close {
+                display: block;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+
+            .dashboard-charts {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-filter {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .plan-card.popular {
+                transform: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-content {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .chart-card {
+                padding: 1rem;
+            }
+
+            .form-card {
+                padding: 1.5rem;
+                margin: 0 1rem;
+            }
+
+            .data-table {
+                font-size: 0.875rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .page-title {
+                font-size: 1.25rem;
+            }
+
+            .logout-btn span {
+                display: none;
+            }
+
+            .data-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .subscription-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .plan-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="m22 21-3-3m0 0a5.5 5.5 0 1 0-7.8-7.8 5.5 5.5 0 0 0 7.8 7.8Z"/>
+                </svg>
+                <span class="logo-text">HRFlow</span>
+            </div>
+            <button class="sidebar-close" id="sidebarClose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9,22 9,12 15,12 15,22"/>
+                </svg>
+                Dashboard
+            </a>
+            <a href="#" class="nav-item" data-page="employees">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="m22 21-3-3m0 0a5.5 5.5 0 1 0-7.8-7.8 5.5 5.5 0 0 0 7.8 7.8Z"/>
+                </svg>
+                Employees
+            </a>
+            <a href="#" class="nav-item" data-page="attendance">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12,6 12,12 16,14"/>
+                </svg>
+                Attendance
+            </a>
+            <a href="#" class="nav-item" data-page="leaves">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                Leaves
+            </a>
+            <a href="#" class="nav-item" data-page="subscription">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                    <line x1="1" y1="10" x2="23" y2="10"/>
+                </svg>
+                Subscription
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="3" y1="12" x2="21" y2="12"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </button>
+                <h1 class="page-title" id="pageTitle">Dashboard</h1>
+            </div>
+            <button class="logout-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16,17 21,12 16,7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Logout
+            </button>
+        </header>
+
+        <!-- Page Content -->
+        <div class="page-content">
+            <!-- Dashboard Page -->
+            <div class="page" id="dashboard-page">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon teal">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="m22 21-3-3m0 0a5.5 5.5 0 1 0-7.8-7.8 5.5 5.5 0 0 0 7.8 7.8Z"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Total Employees</h3>
+                            <p class="stat-number">156</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22,4 12,14.01 9,11.01"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Today's Attendance</h3>
+                            <p class="stat-number">142</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon yellow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Pending Leave Requests</h3>
+                            <p class="stat-number">8</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                                <line x1="1" y1="10" x2="23" y2="10"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Subscription Status</h3>
+                            <p class="stat-text">Active Pro</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-charts">
+                    <div class="chart-card">
+                        <h3>Recent Activities</h3>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon green">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                        <polyline points="22,4 12,14.01 9,11.01"/>
+                                    </svg>
+                                </div>
+                                <div class="activity-content">
+                                    <p>Sarah Johnson's leave approved</p>
+                                    <span>2 hours ago</span>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon blue">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <line x1="22" y1="21" x2="16" y2="15"/>
+                                    </svg>
+                                </div>
+                                <div class="activity-content">
+                                    <p>New employee David Wilson added</p>
+                                    <span>1 day ago</span>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon yellow">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 6v6l4 2"/>
+                                    </svg>
+                                </div>
+                                <div class="activity-content">
+                                    <p>Attendance submitted for today</p>
+                                    <span>3 hours ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Quick Stats</h3>
+                        <div class="progress-list">
+                            <div class="progress-item">
+                                <div class="progress-info">
+                                    <span>Employee Satisfaction</span>
+                                    <span>85%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="progress-info">
+                                    <span>Attendance Rate</span>
+                                    <span>92%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 92%"></div>
+                                </div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="progress-info">
+                                    <span>Leave Utilization</span>
+                                    <span>68%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 68%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employees Page -->
+            <div class="page hidden" id="employees-page">
+                <div class="page-header">
+                    <div class="search-filter">
+                        <div class="search-box">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                            <input type="text" placeholder="Search employees..." id="employeeSearch">
+                        </div>
+                        <button class="filter-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46 22,3"/>
+                            </svg>
+                            Filter
+                        </button>
+                    </div>
+                    <button class="btn-primary" id="addEmployeeBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Add Employee
+                    </button>
+                </div>
+
+                <div class="table-card">
+                    <table class="data-table" id="employeesTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Position</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeesTableBody">
+                            <!-- Employee rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Add/Edit Employee Form -->
+            <div class="page hidden" id="employee-form-page">
+                <div class="form-container">
+                    <div class="form-card">
+                        <h2 id="formTitle">Add New Employee</h2>
+                        <form id="employeeForm">
+                            <div class="form-group">
+                                <label for="employeeName">Name</label>
+                                <input type="text" id="employeeName" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="employeeEmail">Email</label>
+                                <input type="email" id="employeeEmail" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="employeePhone">Phone</label>
+                                <input type="tel" id="employeePhone" name="phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="employeePosition">Position</label>
+                                <input type="text" id="employeePosition" name="position" required>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary" id="saveEmployeeBtn">Add Employee</button>
+                                <button type="button" class="btn-secondary" id="cancelFormBtn">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Page -->
+            <div class="page hidden" id="attendance-page">
+                <div class="page-header">
+                    <h2>Daily Attendance - <span id="attendanceDate"></span></h2>
+                </div>
+
+                <div class="table-card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody">
+                            <!-- Attendance rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                    <div class="form-actions">
+                        <button class="btn-primary" id="submitAttendanceBtn">Submit Attendance</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaves Page -->
+            <div class="page hidden" id="leaves-page">
+                <div class="page-header">
+                    <h2>Leave Requests</h2>
+                    <select class="filter-select" id="leaveStatusFilter">
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+
+                <div class="table-card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>From Date</th>
+                                <th>To Date</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leavesTableBody">
+                            <!-- Leave requests will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Subscription Page -->
+            <div class="page hidden" id="subscription-page">
+                <div class="subscription-header">
+                    <h2>Choose Your Plan</h2>
+                    <p>Select the perfect plan for your organization</p>
+                </div>
+
+                <div class="plans-grid">
+                    <div class="plan-card">
+                        <div class="plan-header">
+                            <h3>Free</h3>
+                            <div class="plan-price">
+                                <span class="price">$0</span>
+                                <span class="period">/month</span>
+                            </div>
+                        </div>
+                        <ul class="plan-features">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                                Up to 10 employees
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                                Basic attendance tracking
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                                Email support
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                                Mobile app access
+                            </li>
+                        </ul>
+                        <button class="plan-btn current">Current Plan</button>
+                    </div>
+
+                    <div class="plan-card popular">
+                        <div class="popular-badge">Most Popular</div>
+                        <div class="plan-header">
+                            <h3>Pro</h3>
+                            <div class="plan-price">
+                                <span class="price">$29</span>
+                                <span class="period">/month</span>
+                            </div>
+                        </div>
+                        <ul class="plan-features">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                                Up to 100 employees
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                                Advanced analytics
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                                Leave management
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                                Priority support
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                                API access
+                            </li>
+                        </ul>
+                        <button class="plan-btn primary">Upgrade Now</button>
+                    </div>
+
+                    <div class="plan-card">
+                        <div class="plan-header">
+                            <h3>Enterprise</h3>
+                            <div class="plan-price">
+                                <span class="price">$99</span>
+                                <span class="period">/month</span>
+                            </div>
+                        </div>
+                        <ul class="plan-features">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                                Unlimited employees
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                                Custom integrations
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                                Advanced reporting
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                                24/7 phone support
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22,4 12,14.01 9,11.01"/>
+                                </svg>
+                                Dedicated account manager
+                            </li>
+                        </ul>
+                        <button class="plan-btn">Contact Sales</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+
+    <script>
+        // Sample Data
+        let employees = [
+            { id: 1, name: 'John Smith', email: 'john@company.com', phone: '+1-555-0123', position: 'Software Developer' },
+            { id: 2, name: 'Sarah Johnson', email: 'sarah@company.com', phone: '+1-555-0124', position: 'UI/UX Designer' },
+            { id: 3, name: 'Mike Davis', email: 'mike@company.com', phone: '+1-555-0125', position: 'Product Manager' },
+            { id: 4, name: 'Emily Chen', email: 'emily@company.com', phone: '+1-555-0126', position: 'Data Analyst' },
+            { id: 5, name: 'David Wilson', email: 'david@company.com', phone: '+1-555-0127', position: 'DevOps Engineer' }
+        ];
+
+        let leaveRequests = [
+            { id: 1, employeeName: 'John Smith', fromDate: '2025-01-15', toDate: '2025-01-17', reason: 'Personal Leave', status: 'pending' },
+            { id: 2, employeeName: 'Sarah Johnson', fromDate: '2025-01-20', toDate: '2025-01-22', reason: 'Sick Leave', status: 'approved' },
+            { id: 3, employeeName: 'Mike Davis', fromDate: '2025-01-25', toDate: '2025-01-26', reason: 'Family Event', status: 'pending' },
+            { id: 4, employeeName: 'Emily Chen', fromDate: '2025-01-30', toDate: '2025-02-01', reason: 'Vacation', status: 'rejected' }
+        ];
+
+        let attendanceData = {};
+        let currentEditingEmployee = null;
+
+        // DOM Elements
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const pageTitle = document.getElementById('pageTitle');
+        const navItems = document.querySelectorAll('.nav-item');
+        const pages = document.querySelectorAll('.page');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            initializeApp();
+            setupEventListeners();
+            showPage('dashboard');
+        });
+
+        function initializeApp() {
+            console.log('Initializing app');
+            // Initialize attendance data
+            employees.forEach(emp => {
+                attendanceData[emp.id] = 'Present';
+            });
+
+            // Set current date for attendance
+            const today = new Date().toLocaleDateString();
+            const attendanceDateElement = document.getElementById('attendanceDate');
+            if (attendanceDateElement) {
+                attendanceDateElement.textContent = today;
+            }
+
+            // Populate initial data
+            populateEmployeesTable();
+            populateAttendanceTable();
+            populateLeavesTable();
+        }
+
+        function setupEventListeners() {
+            console.log('Setting up event listeners');
+            // Sidebar toggle
+            menuToggle.addEventListener('click', toggleSidebar);
+            sidebarClose.addEventListener('click', closeSidebar);
+            overlay.addEventListener('click', closeSidebar);
+
+            // Navigation
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = item.dataset.page;
+                    showPage(page);
+                });
+            });
+
+            // Employee management
+            const addEmployeeBtn = document.getElementById('addEmployeeBtn');
+            if (addEmployeeBtn) {
+                addEmployeeBtn.addEventListener('click', () => showAddEmployeeForm());
+            }
+
+            const employeeForm = document.getElementById('employeeForm');
+            if (employeeForm) {
+                employeeForm.addEventListener('submit', handleEmployeeFormSubmit);
+            }
+
+            const cancelFormBtn = document.getElementById('cancelFormBtn');
+            if (cancelFormBtn) {
+                cancelFormBtn.addEventListener('click', () => showPage('employees'));
+            }
+
+            // Event delegation for edit/delete buttons
+            document.getElementById('employeesTableBody').addEventListener('click', (e) => {
+                const editBtn = e.target.closest('.action-btn.edit');
+                const deleteBtn = e.target.closest('.action-btn.delete');
+
+                if (editBtn) {
+                    const id = parseInt(editBtn.getAttribute('data-id'));
+                    editEmployee(id);
+                }
+                if (deleteBtn) {
+                    const id = parseInt(deleteBtn.getAttribute('data-id'));
+                    deleteEmployee(id);
+                }
+            });
+
+            // Event delegation for leave actions
+            document.getElementById('leavesTableBody').addEventListener('click', (e) => {
+                const approveBtn = e.target.closest('.action-btn.approve');
+                const rejectBtn = e.target.closest('.action-btn.reject');
+
+                if (approveBtn) {
+                    const id = parseInt(approveBtn.getAttribute('data-id'));
+                    updateLeaveStatus(id, 'approved');
+                }
+                if (rejectBtn) {
+                    const id = parseInt(rejectBtn.getAttribute('data-id'));
+                    updateLeaveStatus(id, 'rejected');
+                }
+            });
+
+            // Attendance
+            const submitAttendanceBtn = document.getElementById('submitAttendanceBtn');
+            if (submitAttendanceBtn) {
+                submitAttendanceBtn.addEventListener('click', submitAttendance);
+            }
+
+            // Leave filter
+            const leaveStatusFilter = document.getElementById('leaveStatusFilter');
+            if (leaveStatusFilter) {
+                leaveStatusFilter.addEventListener('change', filterLeaveRequests);
+            }
+
+            // Employee search
+            const employeeSearch = document.getElementById('employeeSearch');
+            if (employeeSearch) {
+                employeeSearch.addEventListener('input', searchEmployees);
+            }
+
+            // Logout
+            document.querySelector('.logout-btn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to logout?')) {
+                    showNotification('Logged out successfully', 'success');
+                    // In a real app, redirect to login page
+                }
+            });
+        }
+
+        function toggleSidebar() {
+            console.log('Toggling sidebar');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            console.log('Closing sidebar');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+
+        function showPage(pageName) {
+            console.log('Showing page:', pageName);
+            // Update navigation
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.page === pageName) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Update page title
+            const titles = {
+                'dashboard': 'Dashboard',
+                'employees': 'Employees',
+                'employee-form': 'Add Employee',
+                'attendance': 'Attendance',
+                'leaves': 'Leave Management',
+                'subscription': 'Subscription Plans'
+            };
+            pageTitle.textContent = titles[pageName] || 'Dashboard';
+
+            // Show/hide pages
+            pages.forEach(page => {
+                page.classList.add('hidden');
+            });
+
+            const targetPage = document.getElementById(`${pageName}-page`);
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+            } else {
+                console.error('Page not found:', pageName);
+            }
+
+            // Close sidebar on mobile
+            if (window.innerWidth < 1024) {
+                closeSidebar();
+            }
+        }
+
+        function populateEmployeesTable() {
+            console.log('Populating employees table:', employees);
+            const tbody = document.getElementById('employeesTableBody');
+            if (!tbody) {
+                console.error('Employees table body not found');
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            employees.forEach(employee => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="employee-info">
+                            <div class="employee-avatar">${employee.name.charAt(0)}</div>
+                            <div class="employee-name">${employee.name}</div>
+                        </div>
+                    </td>
+                    <td>${employee.email}</td>
+                    <td>${employee.phone}</td>
+                    <td>${employee.position}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn edit" data-id="${employee.id}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                            </button>
+                            <button class="action-btn delete" data-id="${employee.id}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3,6 5,6 21,6"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                fragment.appendChild(row);
+            });
+            tbody.innerHTML = '';
+            tbody.appendChild(fragment);
+        }
+
+        function populateAttendanceTable() {
+            console.log('Populating attendance table:', attendanceData);
+            const tbody = document.getElementById('attendanceTableBody');
+            if (!tbody) {
+                console.error('Attendance table body not found');
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            employees.forEach(employee => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="employee-info">
+                            <div class="employee-avatar">${employee.name.charAt(0)}</div>
+                            <div>
+                                <div class="employee-name">${employee.name}</div>
+                                <div style="font-size: 0.875rem; color: #64748b;">${employee.position}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <select class="attendance-select" onchange="updateAttendance(${employee.id}, this.value)">
+                            <option value="Present" ${attendanceData[employee.id] === 'Present' ? 'selected' : ''}>Present</option>
+                            <option value="Absent" ${attendanceData[employee.id] === 'Absent' ? 'selected' : ''}>Absent</option>
+                            <option value="Late" ${attendanceData[employee.id] === 'Late' ? 'selected' : ''}>Late</option>
+                            <option value="Half Day" ${attendanceData[employee.id] === 'Half Day' ? 'selected' : ''}>Half Day</option>
+                        </select>
+                    </td>
+                `;
+                fragment.appendChild(row);
+            });
+            tbody.innerHTML = '';
+            tbody.appendChild(fragment);
+        }
+
+        function populateLeavesTable() {
+            console.log('Populating leaves table:', leaveRequests);
+            const tbody = document.getElementById('leavesTableBody');
+            if (!tbody) {
+                console.error('Leaves table body not found');
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            leaveRequests.forEach(request => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${request.employeeName}</td>
+                    <td>${request.fromDate}</td>
+                    <td>${request.toDate}</td>
+                    <td>${request.reason}</td>
+                    <td>
+                        <span class="status-badge ${request.status}">${request.status}</span>
+                    </td>
+                    <td>
+                        ${request.status === 'pending' ? `
+                            <div class="action-buttons">
+                                <button class="action-btn approve" data-id="${request.id}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                        <polyline points="22,4 12,14.01 9,11.01"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn reject" data-id="${request.id}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="15" y1="9" x2="9" y2="15"/>
+                                        <line x1="9" y1="9" x2="15" y2="15"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        ` : ''}
+                    </td>
+                `;
+                fragment.appendChild(row);
+            });
+            tbody.innerHTML = '';
+            tbody.appendChild(fragment);
+        }
+
+        function showAddEmployeeForm() {
+            console.log('Showing add employee form');
+            currentEditingEmployee = null;
+            document.getElementById('formTitle').textContent = 'Add New Employee';
+            document.getElementById('saveEmployeeBtn').textContent = 'Add Employee';
+            document.getElementById('employeeForm').reset();
+            showPage('employee-form');
+        }
+
+        function editEmployee(id) {
+            console.log('Editing employee:', id);
+            const employee = employees.find(emp => emp.id === id);
+            if (!employee) {
+                console.error('Employee not found:', id);
+                return;
+            }
+
+            currentEditingEmployee = employee;
+            document.getElementById('formTitle').textContent = 'Edit Employee';
+            document.getElementById('saveEmployeeBtn').textContent = 'Update Employee';
+
+            // Populate form
+            document.getElementById('employeeName').value = employee.name;
+            document.getElementById('employeeEmail').value = employee.email;
+            document.getElementById('employeePhone').value = employee.phone;
+            document.getElementById('employeePosition').value = employee.position;
+
+            showPage('employee-form');
+        }
+
+        function deleteEmployee(id) {
+            console.log('Deleting employee:', id);
+            if (confirm('Are you sure you want to delete this employee?')) {
+                employees = employees.filter(emp => emp.id !== id);
+                delete attendanceData[id];
+                populateEmployeesTable();
+                populateAttendanceTable();
+                showNotification('Employee deleted successfully', 'success');
+            }
+        }
+
+        function handleEmployeeFormSubmit(e) {
+            e.preventDefault();
+            console.log('Handling employee form submit');
+
+            const formData = new FormData(e.target);
+            const employeeData = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                position: formData.get('position')
+            };
+
+            if (currentEditingEmployee) {
+                // Update existing employee
+                const index = employees.findIndex(emp => emp.id === currentEditingEmployee.id);
+                if (index !== -1) {
+                    employees[index] = { ...currentEditingEmployee, ...employeeData };
+                    showNotification('Employee updated successfully', 'success');
+                }
+            } else {
+                // Add new employee
+                const newEmployee = {
+                    id: Date.now(),
+                    ...employeeData
+                };
+                employees.push(newEmployee);
+                attendanceData[newEmployee.id] = 'Present';
+                showNotification('Employee added successfully', 'success');
+            }
+
+            populateEmployeesTable();
+            populateAttendanceTable();
+            showPage('employees');
+        }
+
+        function updateAttendance(employeeId, status) {
+            console.log('Updating attendance:', employeeId, status);
+            attendanceData[employeeId] = status;
+        }
+
+        function submitAttendance() {
+            console.log('Submitting attendance:', attendanceData);
+            showNotification('Attendance submitted successfully', 'success');
+        }
+
+        function updateLeaveStatus(requestId, status) {
+            console.log('Updating leave status:', requestId, status);
+            const request = leaveRequests.find(req => req.id === requestId);
+            if (request) {
+                request.status = status;
+                populateLeavesTable();
+                showNotification(`Leave request ${status}`, 'success');
+            }
+        }
+
+        function filterLeaveRequests() {
+            console.log('Filtering leave requests');
+            const filter = document.getElementById('leaveStatusFilter').value;
+            const tbody = document.getElementById('leavesTableBody');
+            const rows = tbody.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const statusBadge = row.querySelector('.status-badge');
+                if (statusBadge) {
+                    const status = statusBadge.textContent.trim();
+                    if (filter === 'all' || status === filter) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        function searchEmployees() {
+            console.log('Searching employees');
+            const searchTerm = document.getElementById('employeeSearch').value.toLowerCase();
+            const tbody = document.getElementById('employeesTableBody');
+            const rows = tbody.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const employeeName = row.querySelector('.employee-name').textContent.toLowerCase();
+                const employeeEmail = row.cells[1].textContent.toLowerCase();
+                const employeePosition = row.cells[3].textContent.toLowerCase();
+
+                if (employeeName.includes(searchTerm) ||
+                    employeeEmail.includes(searchTerm) ||
+                    employeePosition.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function showNotification(message, type = 'info') {
+            console.log('Showing notification:', message, type);
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            console.log('Window resized, width:', window.innerWidth);
+            if (window.innerWidth >= 1024) {
+                closeSidebar();
+            }
+        });
+    </script>
+</body>
+</html>

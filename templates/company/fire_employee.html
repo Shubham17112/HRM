@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Fire Employee{% endblock %}
+{% block page_title %}Fire Employee{% endblock %}
+
+{% block content %}
+<style>
+    .employee-info-card {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .employee-avatar {
+        width: 4rem;
+        height: 4rem;
+        background-color: #f0fdfa;
+        color: #14b8a6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.25rem;
+    }
+
+    .form-control:focus {
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+    }
+
+    .btn-danger {
+        background-color: #dc2626;
+        border-color: #dc2626;
+    }
+
+    .btn-danger:hover {
+        background-color: #b91c1c;
+        border-color: #b91c1c;
+    }
+
+    .alert-warning {
+        background-color: #fef3c7;
+        border-color: #f59e0b;
+        color: #92400e;
+    }
+</style>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <!-- Employee Information Card -->
+        <div class="employee-info-card">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="employee-avatar">{{ employee.name|slice:":1" }}</div>
+                <div>
+                    <h4 class="mb-1">{{ employee.name }}</h4>
+                    <p class="text-muted mb-0">{{ employee.position }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Email:</strong> {{ employee.email }}</p>
+                    <p><strong>Phone:</strong> {{ employee.phone }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Position:</strong> {{ employee.position }}</p>
+                    <p><strong>Current Status:</strong> {{ employee.employment_status|title }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Warning Alert -->
+        <div class="alert alert-warning" role="alert">
+            <div class="d-flex align-items-center">
+                <svg class="me-2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m21 21-3-6h-12l-3 6"/>
+                    <path d="m12 2-3 6h6l-3-6"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <strong>Warning:</strong> This action will terminate the employee and move them to the past employees list.
+            </div>
+        </div>
+
+        <!-- Fire Employee Form -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Fire Employee</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" onsubmit="return confirmFire()">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="leaving_reason" class="form-label">Reason for Termination *</label>
+                        <select name="leaving_reason" id="leaving_reason" class="form-control" required>
+                            <option value="">Select reason...</option>
+                            <option value="poor_performance">Poor Performance</option>
+                            <option value="misconduct">Misconduct</option>
+                            <option value="violation_of_policy">Violation of Company Policy</option>
+                            <option value="downsizing">Downsizing/Layoff</option>
+                            <option value="end_of_contract">End of Contract</option>
+                            <option value="resignation">Resignation</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="additional_notes" class="form-label">Additional Notes (Optional)</label>
+                        <textarea name="additional_notes" id="additional_notes" class="form-control" rows="3" 
+                                placeholder="Any additional details about the termination..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="date_of_leaving" class="form-label">Termination Date *</label>
+                        <input type="date" name="date_of_leaving" id="date_of_leaving" class="form-control" 
+                               value="{% now 'Y-m-d' %}" required>
+                    </div>
+
+                    <!-- Hidden field to set employment status to terminated/fired -->
+                    <input type="hidden" name="employment_status" value="fired">
+
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="{% url 'company:employees' %}" class="btn btn-secondary">
+                            <svg class="me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m12 19-7-7 7-7"/>
+                                <path d="m19 12-7 7-7-7"/>
+                            </svg>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <svg class="me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                            Fire Employee
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmFire() {
+        const employeeName = "{{ employee.name }}";
+        const reason = document.getElementById('leaving_reason').value;
+        
+        if (!reason) {
+            alert('Please select a reason for termination.');
+            return false;
+        }
+        
+        return confirm(`Are you sure you want to fire ${employeeName}?\n\nThis action cannot be undone and will move the employee to the past employees list.`);
+    }
+
+    // Set today as default date
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        const dateInput = document.getElementById('date_of_leaving');
+        if (!dateInput.value) {
+            dateInput.value = today;
+        }
+    });
+</script>
+{% endblock %}

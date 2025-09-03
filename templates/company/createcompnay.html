@@ -1,0 +1,15 @@
+    {% if user.is_authenticated %}
+        {% if not company %}
+        <div class="form-card">
+            <h2>Create Your Company</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">Company Name</label>
+                    {{ form.name }}
+                </div>
+                <button type="submit" class="btn">Create Company</button>
+            </form>
+        </div>
+        {% endif %}
+    {% endif %}

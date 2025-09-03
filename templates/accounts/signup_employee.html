@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Signup</title>
+</head>
+<body>
+<h2>Sign up as Employee</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Sign Up</button>
+</form>
+<p><a href="{% url 'accounts:employee_signup' %}">Back to login</a></p>
+</body>
+</html>

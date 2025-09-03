@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRFlow - Complete HR Management Solution</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="font-poppins leading-normal text-gray-800 bg-gray-100">
+    <!-- Header -->
+        {% if user.is_authenticated %}
+        {% if not company %}
+        <div class="form-card">
+            <h2>Create Your Company</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">Company Name</label>
+                    {{ form.name }}
+                </div>
+                <button type="submit" class="btn">Create Company</button>
+            </form>
+        </div>
+        {% endif %}
+    {% endif %}
+    <header class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <svg class="w-8 h-8 text-teal-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="m22 21-3-3m0 0a5.5 5.5 0 1 0-7.8-7.8 5.5 5.5 0 0 0 7.8 7.8Z"/>
+                    </svg>
+                    <span class="text-2xl font-bold text-gray-900">HRFlow</span>
+                </div>
+                
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#" class="text-gray-900 hover:text-teal-500 font-medium transition-colors">Product</a>
+                    <a href="#" class="text-gray-900 hover:text-teal-500 font-medium transition-colors">Solutions</a>
+                    <a href="#" class="text-gray-900 hover:text-teal-500 font-medium transition-colors">Resources</a>
+                    <a href="#" class="text-gray-900 hover:text-teal-500 font-medium transition-colors">Pricing</a>
+                    <a href="#" class="text-gray-900 hover:text-teal-500 font-medium transition-colors">Company</a>
+                </nav>
+                
+        <div class="hidden md:flex items-center space-x-4">
+    <!-- Link to allauth login page -->
+    <a href="{% url 'accounts:post_login_redirect' %}" class="text-gray-900 font-medium hover:text-teal-500">Sign In</a>
+
+    <!-- Link to allauth signup page -->
+    <a href="{% url 'accounts:employee_signup' %}" class="bg-teal-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-teal-600 transition-all hover:-translate-y-0.5 hover:shadow-lg flex items-center space-x-2">
+        Get Started
+    </a>
+</div>
+                
+                <button class="md:hidden flex flex-col space-y-1 p-2" id="mobileMenuBtn">
+                    <span class="w-6 h-0.5 bg-gray-900"></span>
+                    <span class="w-6 h-0.5 bg-gray-900"></span>
+                    <span class="w-6 h-0.5 bg-gray-900"></span>
+                </button>
+            </div>
+            
+            <div class="hidden md:hidden bg-white border-t border-gray-200 p-5" id="mobileMenu">
+                <nav class="flex flex-col space-y-4">
+                    <a href="#" class="text-gray-900 hover:text-teal-500 font-medium">Product</a>
+                    <a href="#" class="text-gray-900 hover:text-teal-500 font-medium">Solutions</a>
+                    <a href="#" class="text-gray-900 hover:text-teal-500 font-medium">Resources</a>
+                    <a href="#" class="text-gray-900 hover:text-teal-500 font-medium">Pricing</a>
+                    <a href="#" class="text-gray-900 hover:text-teal-500 font-medium">Company</a>
+                    <div class="flex flex-col space-y-3 pt-4 border-t border-gray-200">
+                        <a href="#" class="text-gray-900 font-medium">Sign In</a>
+                        <a href="#" class="bg-teal-500 text-white px-4 py-2 rounded-lg font-semibold text-center">Get Started</a>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-gray-100 via-white to-gray-100 py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="text-center lg:text-left">
+                    <div class="inline-flex items-center space-x-2 bg-teal-500/10 text-teal-500 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+                        <span class="w-2 h-2 bg-teal-500 rounded-full"></span>
+                        <span>#1 HR Management Software</span>
+                    </div>
+                    
+                    <h1 class="text-4xl sm:text-5xl font-bold leading-tight mb-6">
+                        Complete HR <span class="text-teal-500">Management</span><br>Solution
+                    </h1>
+                    
+                    <p class="text-lg text-gray-600 mb-8">
+                        Streamline your HR processes with our comprehensive platform. 
+                        Manage employees, track performance, handle payroll, and build 
+                        a thriving workplace culture.
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 mb-10">
+                        <button class="bg-teal-500 text-white px-6 py-3 rounded-lg font-semibold text-base hover:bg-teal-600 transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                            Start Free Trial
+                        </button>
+                        <button class="border-2 border-gray-900 text-gray-900 px-6 py-3 rounded-lg font-semibold text-base hover:bg-gray-900 hover:text-white transition-all hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="5,3 19,12 5,21 5,3"/>
+                            </svg>
+                            Watch Demo
+                        </button>
+                    </div>
+                    
+                    <div class="flex flex-col space-y-3">
+                        <div class="flex items-center space-x-3 text-gray-600">
+                            <svg class="w-5 h-5 text-teal-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22,4 12,14.01 9,11.01"/>
+                            </svg>
+                            Free forever for small teams
+                        </div>
+                        <div class="flex items-center space-x-3 text-gray-600">
+                            <svg class="w-5 h-5 text-teal-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22,4 12,14.01 9,11.01"/>
+                            </svg>
+                            No setup fees or hidden costs
+                        </div>
+                        <div class="flex items-center space-x-3 text-gray-600">
+                            <svg class="w-5 h-5 text-teal-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22,4 12,14.01 9,11.01"/>
+                            </svg>
+                            World-class support
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="bg-white rounded-2xl shadow-2xl transform rotate-3 hover:rotate-0 transition-transform">
+                        <div class="flex justify-between items-center p-5 bg-gray-50 border-b border-gray-200">
+                            <h3 class="text-base font-semibold">Employee Dashboard</h3>
+                            <div class="flex space-x-2">
+                                <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                                <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
+                                <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-4 py-4 border-b border-gray-100 last:border-0">
+                                <div class="w-12 h-12 bg-teal-500/10 text-teal-500 rounded-lg flex items-center justify-center font-semibold text-sm">JS</div>
+                                <div class="flex-1">
+                                    <div class="font-semibold">John Smith</div>
+                                    <div class="text-sm text-gray-600">Software Developer</div>
+                                </div>
+                                <div class="w-20 h-2 bg-gray-200 rounded">
+                                    <div class="h-full bg-teal-500 rounded w-4/5 transition-all"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 py-4 border-b border-gray-100 last:border-0">
+                                <div class="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-lg flex items-center justify-center font-semibold text-sm">EM</div>
+                                <div class="flex-1">
+                                    <div class="font-semibold">Emma Miller</div>
+                                    <div class="text-sm text-gray-600">Design Lead</div>
+                                </div>
+                                <div class="w-20 h-2 bg-gray-200 rounded">
+                                    <div class="h-full bg-teal-500 rounded w-[90%] transition-all"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 py-4 border-b border-gray-100 last:border-0">
+                                <div class="w-12 h-12 bg-purple-500/10 text-purple-500 rounded-lg flex items-center justify-center font-semibold text-sm">MJ</div>
+                                <div class="flex-1">
+                                    <div class="font-semibold">Mike Johnson</div>
+                                    <div class="text-sm text-gray-600">Product Manager</div>
+                                </div>
+                                <div class="w-20 h-2 bg-gray-200 rounded">
+                                    <div class="h-full bg-teal-500 rounded w-[70%] transition-all"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl sm:text-4xl font-bold mb-4">Everything You Need for Modern HR</h2>
+                <p class="text-lg text-gray-600 max-w-xl mx-auto">
+                    Comprehensive HR management tools designed to scale with your business 
+                    and empower your workforce.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                <div class="bg-gray-100 p-8 rounded-2xl border border-transparent hover:bg-white hover:shadow-xl hover:border-teal-500/20 transition-all hover:-translate-y-1">
+                    <div class="w-16 h-16 bg-teal-500/10 text-teal-500 rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="m22 21-3-3m0 0a5.5 5.5 0 1 0-7.8-7.8 5.5 5.5 0 0 0 7.8 7.8Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Employee Management</h3>
+                    <p class="text-gray-600">
+                        Centralize employee information, track performance, and manage organizational structure with ease.
+                    </p>
+                </div>
+                
+                <div class="bg-gray-100 p-8 rounded-2xl border border-transparent hover:bg-white hover:shadow-xl hover:border-teal-500/20 transition-all hover:-translate-y-1">
+                    <div class="w-16 h-16 bg-teal-500/10 text-teal-500 rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23"/>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Payroll Processing</h3>
+                    <p class="text-gray-600">
+                        Automated payroll calculations, tax deductions, and salary disbursements with complete accuracy.
+                    </p>
+                </div>
+                
+                <div class="bg-gray-100 p-8 rounded-2xl border border-transparent hover:bg-white hover:shadow-xl hover:border-teal-500/20 transition-all hover:-translate-y-1">
+                    <div class="w-16 h-16 bg-teal-500/10 text-teal-500 rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Time & Attendance</h3>
+                    <p class="text-gray-600">
+                        Track work hours, manage leave requests, and monitor attendance patterns in real-time.
+                    </p>
+                </div>
+                
+                <div class="bg-gray-100 p-8 rounded-2xl border border-transparent hover:bg-white hover:shadow-xl hover:border-teal-500/20 transition-all hover:-translate-y-1">
+                    <div class="w-16 h-16 bg-teal-500/10 text-teal-500 rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"/>
+                            <line x1="12" y1="20" x2="12" y2="4"/>
+                            <line x1="6" y1="20" x2="6" y2="14"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Performance Analytics</h3>
+                    <p class="text-gray-600">
+                        Data-driven insights into employee performance, productivity trends, and organizational metrics.
+                    </p>
+                </div>
+                
+                <div class="bg-gray-100 p-8 rounded-2xl border border-transparent hover:bg-white hover:shadow-xl hover:border-teal-500/20 transition-all hover:-translate-y-1">
+                    <div class="w-16 h-16 bg-teal-500/10 text-teal-500 rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10,9 9,9 8,9"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Recruitment Management</h3>
+                    <p class="text-gray-600">
+                        Streamline hiring processes from job posting to onboarding with integrated workflow tools.
+                    </p>
+                </div>
+                
+                <div class="bg-gray-100 p-8 rounded-2xl border border-transparent hover:bg-white hover:shadow-xl hover:border-teal-500/20 transition-all hover:-translate-y-1">
+                    <div class="w-16 h-16 bg-teal-500/10 text-teal-500 rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Compliance & Security</h3>
+                    <p class="text-gray-600">
+                        Ensure data protection and regulatory compliance with enterprise-grade security features.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button class="bg-teal-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-teal-600 transition-all hover:-translate-y-0.5 hover:shadow-lg">Explore All Features</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="py-20 bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl sm:text-4xl font-bold mb-4">Trusted by Organizations Worldwide</h2>
+                <p class="text-lg text-gray-300 max-w-xl mx-auto">
+                    Join thousands of companies that have transformed their HR operations with our platform.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mt-12">
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-teal-500 mb-2">10,000+</div>
+                    <div class="text-gray-300 font-medium">Companies Trust Us</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-teal-500 mb-2">500K+</div>
+                    <div class="text-gray-300 font-medium">Employees Managed</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-teal-500 mb-2">99.9%</div>
+                    <div class="text-gray-300 font-medium">Uptime Guaranteed</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-teal-500 mb-2">24/7</div>
+                    <div class="text-gray-300 font-medium">Support Available</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl sm:text-4xl font-bold mb-4">What Our Customers Say</h2>
+                <p class="text-lg text-gray-600 max-w-xl mx-auto">
+                    Don't just take our word for it. Here's what HR professionals are saying about HRFlow.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-gray-100 p-8 rounded-2xl hover:shadow-xl transition-all hover:-translate-y-1">
+                    <svg class="w-8 h-8 text-teal-500/30 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+                        <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+                    </svg>
+                    <div class="flex space-x-1 mb-5 text-yellow-400 text-lg">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <p class="text-gray-600 italic mb-6">
+                        "HRFlow has completely transformed how we manage our workforce. The automation features alone have saved us 20 hours per week."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=1" alt="Sarah Johnson" class="w-12 h-12 rounded-full object-cover">
+                        <div>
+                            <div class="font-semibold">Sarah Johnson</div>
+                            <div class="text-sm text-gray-600">HR Director at TechCorp</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-100 p-8 rounded-2xl hover:shadow-xl transition-all hover:-translate-y-1">
+                    <svg class="w-8 h-8 text-teal-500/30 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+                        <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+                    </svg>
+                    <div class="flex space-x-1 mb-5 text-yellow-400 text-lg">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <p class="text-gray-600 italic mb-6">
+                        "The reporting capabilities are outstanding. We can now make data-driven decisions about our talent management strategy."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <img src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=1" alt="Michael Chen" class="w-12 h-12 rounded-full object-cover">
+                        <div>
+                            <div class="font-semibold">Michael Chen</div>
+                            <div class="text-sm text-gray-600">People Operations Manager at StartupXYZ</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-100 p-8 rounded-2xl hover:shadow-xl transition-all hover:-translate-y-1">
+                    <svg class="w-8 h-8 text-teal-500/30 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+                        <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+                    </svg>
+                    <div class="flex space-x-1 mb-5 text-yellow-400 text-lg">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <p class="text-gray-600 italic mb-6">
+                        "Seamless integration with our existing systems and exceptional customer support. Highly recommended for growing companies."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <img src="https://images.pexels.com/photos/3752834/pexels-photo-3752834.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=1" alt="Emily Rodriguez" class="w-12 h-12 rounded-full object-cover">
+                        <div>
+                            <div class="font-semibold">Emily Rodriguez</div>
+                            <div class="text-sm text-gray-600">Chief Human Resources Officer at GlobalTech</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-br from-teal-500 to-teal-600 text-white text-center">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl sm:text-4xl font-bold mb-4">Ready to Transform Your HR Operations?</h2>
+            <p class="text-lg text-white/90 mb-10 max-w-xl mx-auto">
+                Join thousands of companies already using HRFlow to streamline their workforce management.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row justify-center flex-wrap gap-8 mb-10">
+                <div class="flex items-center gap-2 text-white/90 font-medium">
+                    <svg class="w-5 h-5 text-white/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22,4 12,14.01 9,11.01"/>
+                    </svg>
+                    Free 14-day trial
+                </div>
+                <div class="flex items-center gap-2 text-white/90 font-medium">
+                    <svg class="w-5 h-5 text-white/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22,4 12,14.01 9,11.01"/>
+                    </svg>
+                    No credit card required
+                </div>
+                <div class="flex items-center gap-2 text-white/90 font-medium">
+                    <svg class="w-5 h-5 text-white/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22,4 12,14.01 9,11.01"/>
+                    </svg>
+                    Setup in under 10 minutes
+                </div>
+                <div class="flex items-center gap-2 text-white/90 font-medium">
+                    <svg class="w-5 h-5 text-white/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22,4 12,14.01 9,11.01"/>
+                    </svg>
+                    Cancel anytime
+                </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-6">
+                <button class="bg-white text-teal-500 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all hover:-translate-y-0.5 hover:shadow-lg">Start Free Trial</button>
+                <button class="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-teal-500 transition-all hover:-translate-y-0.5 hover:shadow-lg">Schedule Demo</button>
+            </div>
+            
+            <p class="text-sm text-white/70">
+                No setup fees • Cancel anytime • World-class support
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
+                <div class="col-span-1">
+                    <div class="flex items-center space-x-3 mb-5">
+                        <svg class="w-8 h-8 text-teal-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="m22 21-3-3m0 0a5.5 5.5 0 1 0-7.8-7.8 5.5 5.5 0 0 0 7.8 7.8Z"/>
+                        </svg>
+                        <span class="text-2xl font-bold">HRFlow</span>
+                    </div>
+                    <p class="text-gray-300 mb-6">
+                        The complete HR management solution that empowers organizations 
+                        to build better workplaces and drive business success through 
+                        people-first strategies.
+                    </p>
+                    <div class="flex flex-col space-y-3">
+                        <div class="flex items-center gap-3 text-gray-300">
+                            <svg class="w-5 h-5 text-teal-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                            </svg>
+                            hello@hrflow.com
+                        </div>
+                        <div class="flex items-center gap-3 text-gray-300">
+                            <svg class="w-5 h-5 text-teal-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                            </svg>
+                            1-800-HRFLOW-1
+                        </div>
+                        <div class="flex items-center gap-3 text-gray-300">
+                            <svg class="w-5 h-5 text-teal-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            San Francisco, CA
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-8">
+                    <div>
+                        <h3 class="text-base font-semibold mb-4">Product</h3>
+                        <ul class="flex flex-col space-y-2">
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Features</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Pricing</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Security</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Integrations</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">API</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-base font-semibold mb-4">Solutions</h3>
+                        <ul class="flex flex-col space-y-2">
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Small Business</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Enterprise</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Startups</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Non-Profits</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Government</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-base font-semibold mb-4">Resources</h3>
+                        <ul class="flex flex-col space-y-2">
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Documentation</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Help Center</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Blog</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Webinars</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Case Studies</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-base font-semibold mb-4">Company</h3>
+                        <ul class="flex flex-col space-y-2">
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">About Us</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Careers</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Press</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Partners</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-teal-500">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row justify-between items-center pt-8 border-t border-gray-800">
+                <div class="text-gray-300 text-sm mb-4 sm:mb-0">© 2025 HRFlow. All rights reserved.</div>
+                <div class="flex gap-6">
+                    <a href="#" class="text-gray-300 hover:text-teal-500 text-sm">Privacy Policy</a>
+                    <a href="#" class="text-gray-300 hover:text-teal-500 text-sm">Terms of Service</a>
+                    <a href="#" class="text-gray-300 hover:text-teal-500 text-sm">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            mobileMenuBtn.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+                mobileMenuBtn.classList.toggle('active');
+                
+                const spans = mobileMenuBtn.querySelectorAll('span');
+                if (mobileMenuBtn.classList.contains('active')) {
+                    spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+                    spans[1].style.opacity = '0';
+                    spans[2].style.transform = 'rotate(-45deg) translate(7px, -6px)';
+                } else {
+                    spans[0].style.transform = 'none';
+                    spans[1].style.opacity = '1';
+                    spans[2].style.transform = 'none';
+                }
+            });
+            
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileMenu.classList.add('hidden');
+                    mobileMenuBtn.classList.remove('active');
+                    
+                    const spans = mobileMenuBtn.querySelectorAll('span');
+                    spans[0].style.transform = 'none';
+                    spans[1].style.opacity = '1';
+                    spans[2].style.transform = 'none';
+                });
+            });
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to header
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 100) {
+                header.classList.add('shadow-2xl');
+                header.classList.remove('shadow-lg');
+            } else {
+                header.classList.add('shadow-lg');
+                header.classList.remove('shadow-2xl');
+            }
+        });
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fadeInUp');
+                }
+            });
+        }, observerOptions);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const animateElements = document.querySelectorAll('.bg-gray-100, .stat-item');
+            animateElements.forEach(el => {
+                observer.observe(el);
+            });
+        });
+
+        // Counter animation for statistics
+        function animateCounter(element, target, duration = 2000) {
+            let start = 0;
+            const increment = target / (duration / 16);
+            
+            function updateCounter() {
+                start += increment;
+                if (start < target) {
+                    element.textContent = Math.floor(start).toLocaleString();
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    element.textContent = target.toLocaleString();
+                }
+            }
+            
+            updateCounter();
+        }
+
+        const statsObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const statNumber = entry.target.querySelector('.text-4xl');
+                    const text = statNumber.textContent;
+                    
+                    let targetNumber = 0;
+                    if (text.includes('K+')) {
+                        targetNumber = parseFloat(text.replace('K+', '')) * 1000;
+                    } else if (text.includes('M+')) {
+                        targetNumber = parseFloat(text.replace('M+', '')) * 1000000;
+                    } else if (text.includes('%')) {
+                        targetNumber = parseFloat(text.replace('%', ''));
+                    } else if (text.includes('/')) {
+                        return;
+                    } else {
+                        targetNumber = parseInt(text.replace(/[^\d]/g, ''));
+                    }
+                    
+                    if (targetNumber > 0) {
+                        statNumber.textContent = '0';
+                        setTimeout(() => {
+                            animateCounter(statNumber, targetNumber);
+                            setTimeout(() => {
+                                statNumber.textContent = text;
+                            }, 2100);
+                        }, 200);
+                    }
+                    
+                    statsObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const statItems = document.querySelectorAll('.stat-item');
+            statItems.forEach(item => {
+                statsObserver.observe(item);
+            });
+        });
+
+        // Progress bar animation
+        function animateProgressBars() {
+            const progressBars = document.querySelectorAll('.bg-teal-500');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 500);
+            });
+        }
+
+        const heroObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    setTimeout(animateProgressBars, 1000);
+                    heroObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const heroSection = document.querySelector('.bg-gradient-to-br');
+            if (heroSection) {
+                heroObserver.observe(heroSection);
+            }
+        });
+
+        // Add loading animation
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.3s ease';
+            
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+</body>
+</html>

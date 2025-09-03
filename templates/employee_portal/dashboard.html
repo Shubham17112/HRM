@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard-container" style="max-width: 900px; margin: auto; padding: 20px;">
+
+    <!-- Welcome section -->
+    <h2>Welcome, {{ employee.name }}</h2>
+    <p>Position: {{ employee.position }}</p>
+    <p>Company: {{ employee.company.name }}</p>
+    <hr>
+
+    <!-- Quick stats -->
+    <div class="stats" style="display: flex; gap: 20px; margin-bottom: 20px;">
+        <div style="flex: 1; background: #f4f4f4; padding: 15px; border-radius: 8px;">
+            <h3>Attendance</h3>
+            <p>Total Days Present: {{ attendance.count }}</p>
+        </div>
+        <div style="flex: 1; background: #f4f4f4; padding: 15px; border-radius: 8px;">
+            <h3>Leaves</h3>
+            <p>Total Leaves: {{ leaves.count }}</p>
+        </div>
+    </div>
+
+    <!-- Attendance record -->
+    <h3>Recent Attendance</h3>
+    <table border="1" cellpadding="8" style="width: 100%; margin-bottom: 20px;">
+        <tr>
+            <th>Date</th>
+            <th>Status</th>
+        </tr>
+        {% for record in attendance|slice:":5" %}
+        <tr>
+            <td>{{ record.date }}</td>
+            <td>{{ record.status }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2">No attendance records found.</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Leave record -->
+    <h3>Recent Leave Requests</h3>
+    <table border="1" cellpadding="8" style="width: 100%; margin-bottom: 20px;">
+        <tr>
+            <th>Date Applied</th>
+            <th>Status</th>
+            <th>Reason</th>
+        </tr>
+        {% for leave in leaves|slice:":5" %}
+        <tr>
+            <td>{{ leave.created_at }}</td>
+            <td>{{ leave.status }}</td>
+            <td>{{ leave.reason }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">No leave requests found.</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Actions -->
+    <a href="{% url 'employee_portal:apply_leave' %}" 
+       style="display: inline-block; padding: 10px 15px; background: #007BFF; color: white; border-radius: 5px; text-decoration: none;">
+       Apply for Leave
+    </a>
+
+</div>
+{% endblock %}

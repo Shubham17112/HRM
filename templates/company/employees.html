@@ -1,0 +1,563 @@
+{% extends 'base.html' %}
+
+{% block title %}Employees{% endblock %}
+{% block page_title %}Employees{% endblock %}
+
+{% block content %}
+<style>
+    .search-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-box svg {
+        position: absolute;
+        left: 0.75rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        color: #64748b;
+    }
+
+    .search-box input {
+        padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        width: 100%;
+        transition: all 0.2s ease;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+    }
+
+    .employee-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .employee-avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+        background-color: #f0fdfa;
+        color: #14b8a6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .past-employee-avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+        background-color: #f9fafb;
+        color: #6b7280;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .employee-name {
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .action-btn {
+        padding: 0.5rem;
+        border: none;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    .action-btn.edit {
+        background-color: #f0fdfa;
+        color: #14b8a6;
+    }
+
+    .action-btn.edit:hover {
+        background-color: #ccfbf1;
+        color: #14b8a6;
+    }
+
+    .action-btn.delete {
+        background-color: #fef2f2;
+        color: #dc2626;
+    }
+
+    .action-btn.delete:hover {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .action-btn svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .invite-section {
+        background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%);
+        border: 1px solid #14b8a6;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .invite-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .invite-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        background-color: #14b8a6;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .invite-form {
+        background-color: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .invite-form .form-row {
+        display: flex;
+        align-items: end;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .invite-form .form-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .invite-form label {
+        display: block;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .invite-form input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .invite-form input:focus {
+        outline: none;
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+    }
+
+    .invite-success {
+        background-color: #ecfdf5;
+        border: 1px solid #10b981;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .invite-success .link-info {
+        flex: 1;
+    }
+
+    .invite-success .invite-link {
+        color: #059669;
+        text-decoration: none;
+        font-weight: 500;
+        word-break: break-all;
+    }
+
+    .invite-success .invite-link:hover {
+        text-decoration: underline;
+    }
+
+    .copy-btn {
+        background-color: #10b981;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-left: 1rem;
+    }
+
+    .copy-btn:hover {
+        background-color: #059669;
+    }
+
+    .delete-invite-btn {
+        background-color: #ef4444;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .delete-invite-btn:hover {
+        background-color: #dc2626;
+    }
+
+    .header-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .search-filter-group {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-group {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+        background-color: #14b8a6;
+        border-color: #14b8a6;
+    }
+
+    .btn-primary:hover {
+        background-color: #0f766e;
+        border-color: #0f766e;
+    }
+
+    .btn-success {
+        background-color: #10b981;
+        border-color: #10b981;
+    }
+
+    .btn-success:hover {
+        background-color: #059669;
+        border-color: #059669;
+    }
+
+    @media (max-width: 768px) {
+        .invite-form .form-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .invite-form .form-group {
+            min-width: auto;
+        }
+        
+        .invite-success {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+        }
+        
+        .copy-btn {
+            margin-left: 0;
+            width: 100%;
+        }
+    }
+</style>
+
+<!-- Invite Link Section -->
+<div class="invite-section">
+    <div class="invite-header">
+        <div class="invite-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                <rect x="2" y="9" width="4" height="12"/>
+                <circle cx="4" cy="4" r="2"/>
+            </svg>
+        </div>
+        <div>
+            <h4 class="mb-1">Employee Invitation System</h4>
+            <p class="text-muted mb-0">Generate secure invite links for new employees to join</p>
+        </div>
+    </div>
+
+    {% if invite_link %}
+    <div class="invite-success">
+        <div class="link-info">
+            <strong>New Invite Link Generated:</strong><br>
+            <a href="{{ invite_link }}" target="_blank" class="invite-link">{{ invite_link }}</a><br>
+            <small class="text-muted">Valid for the selected expiry time</small>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="navigator.clipboard.writeText('{{ invite_link }}')" class="copy-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="margin-right: 0.5rem;">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                Copy
+            </button>
+            {% if invite %}
+            <form action="{% url 'self_signup:delete_invite' invite.id %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="delete-invite-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="margin-right: 0.5rem;">
+                        <polyline points="3,6 5,6 21,6"/>
+                        <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
+                    </svg>
+                    Delete
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="invite-form">
+        <form method="POST" action="{% url 'self_signup:generate_link' %}">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="expiry">Expiry Time (hours)</label>
+                    <input type="number" name="expiry" id="expiry" value="24" min="1" max="168" placeholder="Enter hours (1-168)">
+                </div>
+                <div class="form-group" style="flex: 0 0 auto;">
+                    <button type="submit" class="btn btn-success d-flex align-items-center gap-2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
+                        Generate Link
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Main Header Actions -->
+<div class="header-actions">
+    <div class="search-filter-group">
+        <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input type="text" class="form-control" placeholder="Search employees..." id="employeeSearch">
+        </div>
+        <button class="btn btn-outline-secondary d-flex align-items-center gap-2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46 22,3"/>
+            </svg>
+            Filter
+        </button>
+    </div>
+    
+    <div class="btn-group">
+        <a href="{% url 'company:add_employee' %}" class="btn btn-primary d-flex align-items-center gap-2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Employee
+        </a>
+    </div>
+</div>
+
+<!-- Current Employees Table -->
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            Current Employees
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Position</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="employeesTableBody">
+                {% for employee in current_employees %}
+                <tr>
+                    <td>
+                        <div class="employee-info">
+                            <div class="employee-avatar">{{ employee.name|slice:":1" }}</div>
+                            <div class="employee-name">{{ employee.name }}</div>
+                        </div>
+                    </td>
+                    <td>{{ employee.email }}</td>
+                    <td>{{ employee.phone }}</td>
+                    <td>{{ employee.position }}</td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'company:employee_detail' employee.id %}" class="action-btn edit" title="View Details">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </a>
+                            <a href="{% url 'company:fire_employee' employee.id %}" 
+                                class="action-btn delete"
+                                title="Fire Employee">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48" class="mb-2" style="opacity: 0.5;">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg><br>
+                        No employees found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Past Employees Section -->
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                <path d="M12 2v10l3 3"/>
+                <circle cx="12" cy="12" r="10"/>
+            </svg>
+            Past Employees
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Position</th>
+                    <th>Leaving Date</th>
+                    <th>Reason</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for employee in past_employees %}
+                <tr>
+                    <td>
+                        <div class="employee-info">
+                            <div class="past-employee-avatar">{{ employee.name|slice:":1" }}</div>
+                            <div class="employee-name">{{ employee.name }}</div>
+                        </div>
+                    </td>
+                    <td>{{ employee.email }}</td>
+                    <td>{{ employee.phone }}</td>
+                    <td>{{ employee.position }}</td>
+                    <td>{{ employee.date_of_leaving|date:"M j, Y"|default:"—" }}</td>
+                    <td>{{ employee.leaving_reason|title|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48" class="mb-2" style="opacity: 0.5;">
+                            <path d="M12 2v10l3 3"/>
+                            <circle cx="12" cy="12" r="10"/>
+                        </svg><br>
+                        No past employees found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function confirmDelete() {
+        return confirm('Are you sure you want to delete this employee?');
+    }
+
+    document.getElementById('employeeSearch').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#employeesTableBody tr');
+        rows.forEach(row => {
+            const nameElement = row.querySelector('.employee-name');
+            if (nameElement) {
+                const name = nameElement.textContent.toLowerCase();
+                const email = row.cells[1].textContent.toLowerCase();
+                const position = row.cells[3].textContent.toLowerCase();
+                row.style.display = (name.includes(searchTerm) || email.includes(searchTerm) || position.includes(searchTerm)) ? '' : 'none';
+            }
+        });
+    });
+
+    // Copy functionality with feedback
+    function copyToClipboard(text, button) {
+        navigator.clipboard.writeText(text).then(function() {
+            const originalText = button.innerHTML;
+            button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="margin-right: 0.5rem;"><polyline points="20,6 9,17 4,12"/></svg>Copied!';
+            button.style.backgroundColor = '#059669';
+            
+            setTimeout(function() {
+                button.innerHTML = originalText;
+                button.style.backgroundColor = '#10b981';
+            }, 2000);
+        });
+    }
+</script>
+{% endblock %}

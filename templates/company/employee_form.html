@@ -7,108 +7,102 @@
 <style>
     .form-card {
         background: white;
-        padding: 2rem;
+        padding: 2.5rem;
         border-radius: 1rem;
         border: 1px solid #e2e8f0;
-        width: 100%;
-        max-width: 600px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        max-width: 900px; /* Good width for a tabbed form */
         margin: 2rem auto;
+    }
+    /* Style for the navigation tabs */
+    .nav-tabs {
+        border-bottom: 1px solid #dee2e6;
+    }
+    .nav-tabs .nav-link {
+        border: 1px solid transparent;
+        border-top-left-radius: .5rem;
+        border-top-right-radius: .5rem;
+        color: #495057;
+    }
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;
+        background-color: #fff;
+        border-color: #dee2e6 #dee2e6 #fff;
+        font-weight: 500;
+    }
+    /* Add padding to the content area of the tabs */
+    .tab-content {
+        padding: 1.5rem 0.5rem;
     }
 </style>
 
 <div class="form-card">
+    <h2 class="text-center mb-4">{{ form_title|default:"Add New Employee" }}</h2>
+
     {% if form.errors %}
-        <ul class="text-danger">
-            {% for field in form %}
-                {% for error in field.errors %}
+        <div class="alert alert-danger">
+            <strong>Please correct the errors below:</strong>
+            <ul class="mb-0 mt-2">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
                     <li>{{ error }}</li>
                 {% endfor %}
-            {% endfor %}
-            {% for error in form.non_field_errors %}
-                <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
+            </ul>
+        </div>
     {% endif %}
-
-    <h2 class="text-center mb-4">{{ form_title|default:"Add New Employee" }}</h2>
 
     <form id="employeeForm" method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <!-- Basic Details -->
-        <div class="mb-3">
-            <label class="form-label">Name</label>
-            <input type="text" class="form-control" name="name" value="{{ form.name.value|default:'' }}" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" class="form-control" name="email" value="{{ form.email.value|default:'' }}" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Phone</label>
-            <input type="tel" class="form-control" name="phone" value="{{ form.phone.value|default:'' }}">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Position</label>
-            <input type="text" class="form-control" name="position" value="{{ form.position.value|default:'' }}">
-        </div>
+        <ul class="nav nav-tabs" id="employeeTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab" aria-controls="basic" aria-selected="true">1. Basic & Login</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="bank-tab" data-bs-toggle="tab" data-bs-target="#bank" type="button" role="tab" aria-controls="bank" aria-selected="false">2. Bank Details</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="docs-tab" data-bs-toggle="tab" data-bs-target="#docs" type="button" role="tab" aria-controls="docs" aria-selected="false">3. Documents</button>
+            </li>
+        </ul>
 
-        <!-- Login Details -->
-        <div class="mb-3">
-            <label class="form-label">Username</label>
-            <input type="text" class="form-control" name="username" value="{{ form.username.value|default:'' }}" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Password</label>
-            <input type="password" class="form-control" name="password" required>
-        </div>
-
-        <!-- Bank Details -->
-        <h5 class="mt-4">Bank Details</h5>
-        <div class="mb-3">
-            <label class="form-label">Account Number</label>
-            <input type="text" class="form-control" name="account_number">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Bank Name</label>
-            <input type="text" class="form-control" name="bank_name">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">IFSC Code</label>
-            <input type="text" class="form-control" name="ifsc_code">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Branch</label>
-            <input type="text" class="form-control" name="branch">
-        </div>
-
-        <!-- Aadhaar Details -->
-        <h5 class="mt-4">Aadhaar Details</h5>
-        <div class="mb-3">
-            <label class="form-label">Aadhaar Number</label>
-            <input type="text" class="form-control" name="aadhaar_number">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Upload Aadhaar Document</label>
-            <input type="file" class="form-control" name="aadhaar_file">
-        </div>
-
-        <!-- Other Documents -->
-        <h5 class="mt-4">Other Documents</h5>
-        <div class="mb-3">
-            <label class="form-label">Upload Documents</label>
-            <input type="file" class="form-control" name="documents" multiple>
-        </div>
-                <div class="form-group">
-                        <label for="employment_status">Employment Status</label>
-                        <select name="employment_status" id="employment_status" class="form-control" required>
-                            <option value="">Select Employment Status</option>
-                            <option value="current">Full Time</option>
-                            <option value="past">Part Time</option>
-                        </select>
+        <div class="tab-content" id="employeeTabContent">
+            
+            <div class="tab-pane fade show active" id="basic" role="tabpanel" aria-labelledby="basic-tab">
+                <div class="row">
+                    <div class="col-md-6 mb-3"><label class="form-label">Name</label><input type="text" class="form-control" name="name" value="{{ form.name.value|default:'' }}" required></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Email</label><input type="email" class="form-control" name="email" value="{{ form.email.value|default:'' }}" required></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Phone</label><input type="tel" class="form-control" name="phone" value="{{ form.phone.value|default:'' }}"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Position</label><input type="text" class="form-control" name="position" value="{{ form.position.value|default:'' }}"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Username</label><input type="text" class="form-control" name="username" value="{{ form.username.value|default:'' }}" required></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Password</label><input type="password" class="form-control" name="password" required></div>
                 </div>
-        <!-- Submit -->
-        <div class="d-flex gap-3">
+            </div>
+
+            <div class="tab-pane fade" id="bank" role="tabpanel" aria-labelledby="bank-tab">
+                 <div class="row">
+                    <div class="col-md-6 mb-3"><label class="form-label">Bank Name</label><input type="text" class="form-control" name="bank_name"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Account Number</label><input type="text" class="form-control" name="account_number"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">IFSC Code</label><input type="text" class="form-control" name="ifsc_code"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Branch</label><input type="text" class="form-control" name="branch"></div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="docs" role="tabpanel" aria-labelledby="docs-tab">
+                <div class="row">
+                    <div class="col-md-6 mb-3"><label class="form-label">Aadhaar Number</label><input type="text" class="form-control" name="aadhaar_number"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Upload Aadhaar Document</label><input type="file" class="form-control" name="aadhaar_file"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Upload Other Documents</label><input type="file" class="form-control" name="documents" multiple></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Employment Status</label><select name="employment_status" class="form-control" required><option value="" selected disabled>Select...</option><option value="current">Full Time</option><option value="past">Part Time</option></select></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-3 mt-4 border-top pt-4">
             <button type="submit" class="btn btn-primary flex-fill">{{ submit_button_text|default:"Add Employee" }}</button>
             <a href="{% url 'company:employees' %}" class="btn btn-outline-secondary flex-fill">Cancel</a>
         </div>

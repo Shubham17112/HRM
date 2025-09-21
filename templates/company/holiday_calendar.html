@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+
+{% block title %}Holiday Calendar{% endblock %}
+{% block page_title %}Holiday Calendar - {{ current_year }}{% endblock %}
+
+{% block content %}
+<style>
+    .calendar-container {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+        background: #e2e8f0;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .calendar-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .calendar-day {
+        background: white;
+        padding: 0.75rem;
+        min-height: 80px;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .calendar-day:hover {
+        background: #f8fafc;
+    }
+
+    .calendar-day.sunday {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .calendar-day.holiday {
+        background: #f0fdf4;
+        color: #16a34a;
+        border-left: 4px solid #22c55e;
+    }
+
+    .calendar-day.national-holiday {
+        background: #fef3c7;
+        color: #d97706;
+        border-left: 4px solid #f59e0b;
+    }
+
+    .day-number {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .holiday-name {
+        font-size: 0.75rem;
+        background: rgba(34, 197, 94, 0.1);
+        padding: 2px 4px;
+        border-radius: 4px;
+        margin-bottom: 2px;
+    }
+
+    .add-holiday-form {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: border-color 0.2s ease;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #14b8a6, #22c55e);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+    }
+
+    .holiday-list {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .holiday-item {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        padding: 0.75rem;
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.2s ease;
+    }
+
+    .holiday-item:hover {
+        background: #f8fafc;
+    }
+
+    .holiday-item:last-child {
+        border-bottom: none;
+    }
+
+    .holiday-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .holiday-badge.national {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .holiday-badge.company {
+        background: #f0fdf4;
+        color: #16a34a;
+    }
+
+    .holiday-badge.regional {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .year-selector {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .year-btn {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #374151;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .year-btn:hover {
+        background: #f1f5f9;
+        border-color: #14b8a6;
+    }
+</style>
+
+<!-- Add Holiday Form -->
+<div class="add-holiday-form">
+    <h3 style="margin-bottom: 1.5rem; color: #1f2937;">Add New Holiday</h3>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label class="form-label">Holiday Name</label>
+                    <input type="text" name="holiday_name" class="form-input" placeholder="e.g., Company Picnic" required>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" name="holiday_date" class="form-input" required>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select name="holiday_type" class="form-input">
+                        <option value="company">Company Holiday</option>
+                        <option value="regional">Regional Holiday</option>
+                        <option value="national">National Holiday</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" name="add_holiday" class="btn-primary" style="width: 100%;">Add Holiday</button>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Description (Optional)</label>
+            <textarea name="description" class="form-input" rows="2" placeholder="Additional details about the holiday"></textarea>
+        </div>
+    </form>
+</div>
+
+<!-- Year Selector -->
+<div class="year-selector">
+    <h3>Year: {{ current_year }}</h3>
+    <button class="year-btn" onclick="changeYear({{ current_year|add:-1 }})">← {{ current_year|add:-1 }}</button>
+    <button class="year-btn" onclick="changeYear({{ current_year|add:1 }})">{{ current_year|add:1 }} →</button>
+</div>
+<!-- Month Selector -->
+<div class="month-selector" style="margin-bottom: 1rem;">
+    <label for="month-select"><strong>Month:</strong></label>
+    <select id="month-select" onchange="changeMonth()">
+        <option value="0">January</option>
+        <option value="1">February</option>
+        <option value="2">March</option>
+        <option value="3">April</option>
+        <option value="4">May</option>
+        <option value="5">June</option>
+        <option value="6">July</option>
+        <option value="7">August</option>
+        <option value="8">September</option>
+        <option value="9">October</option>
+        <option value="10">November</option>
+        <option value="11">December</option>
+    </select>
+</div>
+
+<!-- Calendar -->
+<div class="calendar-container">
+    <div id="calendar-display">
+        <!-- Calendar will be generated by JavaScript -->
+    </div>
+</div>
+
+<!-- Holiday List -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="holiday-list">
+            <h3 style="margin-bottom: 1.5rem;">Holidays for {{ current_year }}</h3>
+            {% for holiday in holidays %}
+            <div class="holiday-item">
+                <div style="flex: 1;">
+                    <h5 style="margin-bottom: 0.25rem;">{{ holiday.name }}</h5>
+                    <p style="margin-bottom: 0.25rem; color: #6b7280; font-size: 0.875rem;">{{ holiday.date|date:"F j, Y" }} ({{ holiday.date|date:"l" }})</p>
+                    {% if holiday.description %}
+                    <p style="margin-bottom: 0; color: #9ca3af; font-size: 0.75rem;">{{ holiday.description }}</p>
+                    {% endif %}
+                </div>
+                <span class="holiday-badge {{ holiday.holiday_type }}">{{ holiday.get_holiday_type_display }}</span>
+            </div>
+            {% empty %}
+            <p style="text-align: center; color: #6b7280;">No holidays added yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="holiday-list">
+            <h3 style="margin-bottom: 1.5rem;">Quick Stats</h3>
+            <div style="text-align: center;">
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #14b8a6;">{{ holidays.count }}</div>
+                    <div style="color: #6b7280;">Total Holidays</div>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #f59e0b;">{{ holidays|length }}</div>
+                    <div style="color: #6b7280;">Working Days</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: 600; color: #6366f1;">52</div>
+                    <div style="color: #6b7280;">Sundays</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+console.log("Calendar script loaded");
+
+const calendarDisplay = document.getElementById('calendar-display');
+if (!calendarDisplay) {
+    console.error("calendar-display element not found");
+} else {
+    calendarDisplay.innerHTML = "<p>Calendar placeholder</p>";
+}
+});
+const holidays = {{ holidays|safe }};
+const attendanceMap = {{ attendance_map|safe }};
+const currentYear = {{ current_year }};
+
+// Convert holidays to a more usable format
+const holidayMap = {};
+{% for holiday in holidays %}
+holidayMap['{{ holiday.date|date:"Y-m-d" }}'] = {
+    name: '{{ holiday.name|escapejs }}',
+    type: '{{ holiday.holiday_type }}',
+    description: '{{ holiday.description|escapejs }}'
+};
+{% endfor %}
+function generateCalendar(year, month = null) {
+    const calendarDisplay = document.getElementById('calendar-display');
+    const months = [
+        'January','February','March','April','May','June',
+        'July','August','September','October','November','December'
+    ];
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+    let html = '';
+
+    // If month is null, show all 12
+    const startMonth = month === null ? 0 : month;
+    const endMonth = month === null ? 11 : month;
+
+    for (let m = startMonth; m <= endMonth; m++) {
+        html += `<div style="margin-bottom: 2rem;">`;
+        html += `<h4 style="margin-bottom: 1rem; color: #1f2937;">${months[m]} ${year}</h4>`;
+
+        html += `<div class="calendar-grid">`;
+        dayNames.forEach(day => {
+            html += `<div class="calendar-header">${day}</div>`;
+        });
+
+        const firstDay = new Date(year, m, 1).getDay();
+        const daysInMonth = new Date(year, m + 1, 0).getDate();
+
+        for (let i = 0; i < firstDay; i++) {
+            html += `<div class="calendar-day"></div>`;
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, m, day);
+            const dateStr = date.toISOString().split('T')[0];
+            const isSunday = date.getDay() === 0;
+            const holiday = holidayMap[dateStr];
+            const attendance = attendanceMap[dateStr];
+
+            let classes = ['calendar-day'];
+            let content = `<div class="day-number">${day}</div>`;
+
+            if (isSunday) {
+                classes.push('sunday');
+                content += `<div class="holiday-name" style="background: rgba(220, 38, 38, 0.1);">Sunday</div>`;
+            }
+
+            if (holiday) {
+                if (holiday.type === 'national') {
+                    classes.push('national-holiday');
+                } else {
+                    classes.push('holiday');
+                }
+                content += `<div class="holiday-name">${holiday.name}</div>`;
+            }
+
+            if (attendance) {
+                classes.push(attendance.toLowerCase().replace(" ", "-"));
+                content += `<div class="attendance-name">${attendance}</div>`;
+            }
+
+            html += `<div class="${classes.join(' ')}" data-date="${dateStr}">${content}</div>`;
+        }
+
+        html += `</div></div>`;
+    }
+
+    calendarDisplay.innerHTML = html;
+}
+
+// Hook month selector
+function changeMonth() {
+    const selectedMonth = parseInt(document.getElementById('month-select').value);
+    generateCalendar(currentYear, selectedMonth);
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    generateCalendar(currentYear,new Date().getMonth());
+    
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.calendar-day')) {
+            const day = e.target.closest('.calendar-day');
+            const date = day.dataset.date;
+            if (date && !holidayMap[date]) {
+                const holidayName = prompt('Enter holiday name for ' + date + ':');
+                if (holidayName) {
+                    console.log('Adding holiday:', holidayName, 'on', date);
+                }
+            }
+        }
+    });
+});
+</script>
+
+
+{% endblock %}

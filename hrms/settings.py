@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'accounts',
     'company',
      'self_signup',
+     'employee_portal',
 ]
 
 SITE_ID = 1

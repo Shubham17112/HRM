@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.utils import timezone
 
 class Company(models.Model):
     name = models.CharField(max_length=100)
@@ -9,9 +10,12 @@ class Company(models.Model):
         on_delete=models.CASCADE,
         related_name='companies'
     )
+    first_login = models.DateTimeField(default=timezone.now) 
 
+    is_active = models.BooleanField(default=True)
     def __str__(self):
         return self.name
+from datetime import date
 
 class Employee(models.Model):
     user = models.OneToOneField(
@@ -37,7 +41,10 @@ class Employee(models.Model):
 
     def __str__(self):
         return self.name
-
+    
+    @property
+    def attendances_today(self):
+        return self.attendances.filter(date=date.today()).first()
 
 # ------------------- NEW MODELS -------------------
 
@@ -72,15 +79,46 @@ class EmployeeAadhaarDetail(models.Model):
     def __str__(self):
         return f"{self.employee.name} - {self.aadhaar_number}"
 
+# your_app/models.py
+from django.db import models
+from django.utils import timezone
+# Make sure to import your Company and Employee models
+# from your_accounts_app.models import Company, Employee 
 
+# New Model for Company-specific settings
+class AttendanceSettings(models.Model):
+    company = models.OneToOneField(Company, on_delete=models.CASCADE, related_name='attendance_settings')
+    shift_start_time = models.TimeField(default='09:30:00')
+    late_grace_period_minutes = models.PositiveIntegerField(default=15, help_text="Grace period in minutes before marking as late.")
+    half_day_cutoff_time = models.TimeField(default='12:00:00', help_text="Clock-ins after this time are suggested as Half Day.")
+
+    def __str__(self):
+        return f"Attendance Settings for {self.company.name}"
+
+# Updated Attendance Model to handle requests and approval
 class Attendance(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    date = models.DateField()
-    status = models.CharField(max_length=10, choices=[('Present', 'Present'), ('Absent', 'Absent')])
+    ATTENDANCE_TYPE_CHOICES = [
+        ('On Time', 'On Time'),
+        ('Late', 'Late'),
+        ('Half Day', 'Half Day'),
+        ('Absent', 'Absent'),
+        ('Holiday', 'Holiday'),
+        ('Leave', 'Leave'),
+    ]
 
-    class Meta:
-        unique_together = ('employee', 'date')
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='attendances')
+    date = models.DateField(default=timezone.now)
+    clock_in_time = models.TimeField(null=True, blank=True)
+    clock_out_time = models.TimeField(null=True, blank=True)
+    approved = models.BooleanField(default=False)
+    attendance_type = models.CharField(max_length=10, choices=ATTENDANCE_TYPE_CHOICES, null=True, blank=True)
+    reason = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.employee.name} on {self.date} - {self.attendance_type or 'Not Recorded'}"
+
+    
+    
 
 class Leave(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
@@ -91,8 +129,85 @@ class Leave(models.Model):
     status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')])
 
 class Subscription(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    plan = models.CharField(max_length=20, choices=[('Free', 'Free'), ('Pro', 'Pro'), ('Enterprise', 'Enterprise')])
-    active = models.BooleanField(default=True)  
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="subscriptions")
+    plan = models.CharField(
+        max_length=20,
+        choices=[('Free', 'Free'), ('Pro', 'Pro'), ('Enterprise', 'Enterprise')]
+    )
+    active = models.BooleanField(default=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.company.name} - {self.plan}"
 
 
+
+# Add these new models to your existing models.py
+
+class Notification(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='created_notifications'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.company.name} - {self.title}"
+
+class Holiday(models.Model):
+    HOLIDAY_TYPES = [
+        ('national', 'National Holiday'),
+        ('company', 'Company Holiday'),
+        ('regional', 'Regional Holiday'),
+    ]
+    
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='holidays')
+    name = models.CharField(max_length=100)
+    date = models.DateField()
+    holiday_type = models.CharField(max_length=20, choices=HOLIDAY_TYPES, default='company')
+    description = models.TextField(blank=True)
+    is_recurring = models.BooleanField(default=False)  # for yearly recurring holidays
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('company', 'date', 'name')
+        ordering = ['date']
+    
+    def __str__(self):
+        return f"{self.name} - {self.date}"
+
+class NotificationRead(models.Model):
+    notification = models.ForeignKey(Notification, on_delete=models.CASCADE)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    read_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('notification', 'employee')
+
+
+
+
+# hr_notifications/models.py
+from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class AdminToHRNotification(models.Model):
+    hr_user = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'is_hr': True})
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.title} to {self.hr_user}"

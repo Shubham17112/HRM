@@ -14,6 +14,7 @@
         align-items: center;
         gap: 1rem;
         transition: all 0.2s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     }
 
     .stat-card:hover {
@@ -51,6 +52,11 @@
         color: #3b82f6;
     }
 
+    .stat-icon.red {
+        background-color: #fef2f2;
+        color: #ef4444;
+    }
+
     .stat-icon svg {
         width: 1.5rem;
         height: 1.5rem;
@@ -70,18 +76,75 @@
         line-height: 1;
     }
 
-    .stat-text {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: #14b8a6;
-        line-height: 1;
-    }
-
     .chart-card {
         background: white;
         padding: 1.5rem;
         border-radius: 1rem;
         border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .notification-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    .notification-form {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .form-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+    }
+
+    .form-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        resize: vertical;
+        min-height: 80px;
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    .form-textarea:focus {
+        outline: none;
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
     }
 
     .activity-icon {
@@ -114,17 +177,6 @@
         height: 1rem;
     }
 
-    .activity-content p {
-        font-weight: 500;
-        color: #1e293b;
-        margin-bottom: 0.25rem;
-    }
-
-    .activity-content span {
-        font-size: 0.75rem;
-        color: #64748b;
-    }
-
     .progress-bar {
         width: 100%;
         height: 0.5rem;
@@ -135,12 +187,130 @@
 
     .progress-fill {
         height: 100%;
-        background-color: #14b8a6;
+        background: linear-gradient(90deg, #14b8a6, #22c55e);
         border-radius: 0.25rem;
         transition: width 0.3s ease;
     }
-</style>
 
+    .btn-primary {
+        background: linear-gradient(135deg, #14b8a6, #22c55e);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        color: white;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+    }
+
+    .calendar-link {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+
+    .calendar-link:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .metric-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+    }
+
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #14b8a6, #22c55e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .notification-item {
+        background: #f8fafc;
+        border-left: 4px solid #14b8a6;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 0.5rem;
+    }
+</style>
+<!-- somewhere in your HR dashboard -->
+<h3>Admin Notifications</h3>
+<ul>
+  {% for note in admin_notifications %}
+    <li>
+      <strong>{{ note.title }}</strong> - {{ note.message }} 
+      {% if not note.is_read %}
+        <span style="color:red">(New)</span>
+      {% endif %}
+      <small>{{ note.created_at }}</small>
+    </li>
+  {% empty %}
+    <li>No notifications</li>
+  {% endfor %}
+</ul>
+
+<!-- Streamlined Notification Form -->
+<div class="notification-card">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="m13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <h4 style="margin: 0; color: #1e293b;">Send Notification</h4>
+    </div>
+    
+    <form method="POST" class="notification-form">
+        {% csrf_token %}
+        <div class="form-group" style="flex: 0 0 200px;">
+            <label class="form-label">Title</label>
+            <input type="text" name="notification_title" class="form-input" placeholder="Enter title" required>
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label class="form-label">Message</label>
+            <textarea name="notification_message" class="form-textarea" placeholder="Write your message to all employees..." required></textarea>
+        </div>
+        <div style="flex: 0 0 auto;">
+            <button type="submit" class="btn-primary">
+                Send to All
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Quick Actions -->
+<div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+    <a href="{% url 'company:holiday_calendar' %}" class="calendar-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        Holiday Calendar
+    </a>
+</div>
+
+<!-- Statistics Cards -->
 <div class="row g-4 mb-4">
     <div class="col-12 col-md-6 col-lg-3">
         <div class="stat-card">
@@ -153,79 +323,128 @@
             </div>
             <div class="stat-content">
                 <h3>Total Employees</h3>
-                <p class="stat-number">{{ employee_count|default:156 }}</p>
+                <p class="stat-number">{{ total_employees }}</p>
             </div>
-            
         </div>
     </div>
-     <div class="col-12 col-md-6 col-lg-3">
+    
+    <div class="col-12 col-md-6 col-lg-3">
         <div class="stat-card">
-            <div class="stat-icon teal">
+            <div class="stat-icon green">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="m22 21-3-3m0 0a5.5 5.5 0 1 0-7.8-7.8 5.5 5.5 0 0 0 7.8 7.8Z"/>
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22,4 12,14.01 9,11.01"/>
                 </svg>
             </div>
             <div class="stat-content">
-                <h3>Total Attandance </h3>
-                <p class="stat-number">{{ employee_count|default:0 }}</p>
+                <h3>Present Today</h3>
+                <p class="stat-number">{{ present_today }}</p>
             </div>
-            
         </div>
     </div>
-     <div class="col-12 col-md-6 col-lg-3">
+
+    <div class="col-12 col-md-6 col-lg-3">
         <div class="stat-card">
-            <div class="stat-icon teal">
+            <div class="stat-icon yellow">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="m22 21-3-3m0 0a5.5 5.5 0 1 0-7.8-7.8 5.5 5.5 0 0 0 7.8 7.8Z"/>
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
                 </svg>
             </div>
             <div class="stat-content">
-                <h3>Total Employees</h3>
-                <p class="stat-number">{{ employee_count|default:156 }}</p>
+                <h3>Pending Leaves</h3>
+                <p class="stat-number">{{ pending_leaves }}</p>
             </div>
-            
         </div>
     </div>
-    <!-- Add other stat cards similarly -->
+
+    <div class="col-12 col-md-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9,22 9,12 15,12 15,22"/>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <h3>On Leave Today</h3>
+                <p class="stat-number">{{ approved_leaves_today }}</p>
+            </div>
+        </div>
+    </div>
 </div>
 
+<!-- Monthly Overview -->
+<div class="row g-4 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="metric-card">
+            <h4 style="color: #64748b; margin-bottom: 0.5rem;">Attendance Rate</h4>
+            <div class="metric-value">{{ attendance_percentage }}%</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="metric-card">
+            <h4 style="color: #64748b; margin-bottom: 0.5rem;">Monthly Present</h4>
+            <div class="metric-value">{{ monthly_attendance.present }}</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="metric-card">
+            <h4 style="color: #64748b; margin-bottom: 0.5rem;">Monthly Absent</h4>
+            <div class="metric-value">{{ monthly_attendance.absent }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Row -->
 <div class="row g-4">
+    <!-- Recent Activities -->
     <div class="col-12 col-lg-6">
         <div class="chart-card">
-            <h3>Recent Activities</h3>
+            <h3 style="margin-bottom: 1.5rem;">Recent Activities</h3>
             <div class="d-flex flex-column gap-3">
-                {% for activity in recent_activities|default:default_activities %}
+                {% for activity in recent_activities %}
                 <div class="d-flex align-items-center gap-3">
-                    <div class="activity-icon {{ activity.icon_class|default:'green' }}">
+                    <div class="activity-icon {{ activity.icon_class }}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            {{ activity.icon_svg|default:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/>' }}
+                            {% if activity.type == 'leave' %}
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            {% else %}
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22,4 12,14.01 9,11.01"/>
+                            {% endif %}
                         </svg>
                     </div>
                     <div class="activity-content">
-                        <p>{{ activity.description|default:"Sarah Johnson's leave approved" }}</p>
-                        <span>{{ activity.time|default:"2 hours ago" }}</span>
+                        <p>{{ activity.description }}</p>
+                        <span>{{ activity.time }}</span>
                     </div>
                 </div>
+                {% empty %}
+                <p style="text-align: center; color: #64748b;">No recent activities</p>
                 {% endfor %}
             </div>
         </div>
     </div>
+
+    <!-- Quick Stats with Progress Bars -->
     <div class="col-12 col-lg-6">
         <div class="chart-card">
-            <h3>Quick Stats</h3>
+            <h3 style="margin-bottom: 1.5rem;">Performance Metrics</h3>
             <div class="d-flex flex-column gap-3">
-                {% for stat in quick_stats|default:default_stats %}
+                {% for stat in quick_stats %}
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span>{{ stat.name|default:"Employee Satisfaction" }}</span>
-                        <span>{{ stat.value|default:"85%" }}</span>
+                        <span style="font-weight: 500;">{{ stat.name }}</span>
+                        <span style="font-weight: 600; color: #14b8a6;">{{ stat.value }}</span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width: {{ stat.value|default:'85%' }}"></div>
+                        <div class="progress-fill" style="width: {{ stat.percentage }}%"></div>
                     </div>
                 </div>
                 {% endfor %}
@@ -234,10 +453,39 @@
     </div>
 </div>
 
+<!-- Recent Notifications -->
+{% if recent_notifications %}
+<div class="row g-4 mt-2">
+    <div class="col-12">
+        <div class="chart-card">
+            <h3 style="margin-bottom: 1.5rem;">Recent Notifications</h3>
+            {% for notification in recent_notifications %}
+            <div class="notification-item">
+                <h5 style="margin-bottom: 0.5rem; color: #1e293b;">{{ notification.title }}</h5>
+                <p style="margin-bottom: 0.5rem; color: #475569;">{{ notification.message }}</p>
+                <small style="color: #64748b;">{{ notification.created_at|timesince }} ago</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <script>
-    // Client-side JavaScript if needed
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add any dashboard-specific JavaScript here
+document.addEventListener('DOMContentLoaded', function() {
+    // Add any dashboard-specific JavaScript here
+    console.log('Dashboard loaded with dynamic data');
+    
+    // Animate progress bars on load
+    const progressBars = document.querySelectorAll('.progress-fill');
+    progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 500);
     });
+});
 </script>
+
 {% endblock %}

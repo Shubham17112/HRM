@@ -4,59 +4,67 @@
 {% block page_title %}Attendance{% endblock %}
 
 {% block content %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+
 <style>
-    #notification {
+#notification {
     position: fixed;
     top: 20px;
     right: 20px;
-    background-color: #28a745; /* green for success */
+    background-color: #28a745;
     color: white;
     padding: 12px 20px;
     border-radius: 5px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     font-weight: 600;
     z-index: 10000;
-    display: none; /* hidden by default */
+    display: none;
 }
-#notification.error {
-    background-color: #dc3545; /* red for error */
+#notification.error { background-color: #dc3545; }
+
+.attendance-select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.375rem;
+    background: white;
+    color: #64748b;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
-    .attendance-select {
-        padding: 0.5rem 0.75rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.375rem;
-        background: white;
-        color: #64748b;
-        font-size: 0.875rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
 
-    .employee-info {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
+.employee-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
 
-    .employee-avatar {
-        width: 2.5rem;
-        height: 2.5rem;
-        background-color: #f0fdfa;
-        color: #14b8a6;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
+.employee-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    background-color: #f0fdfa;
+    color: #14b8a6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
 </style>
+
 <div id="notification"></div>
 
 <div class="mb-4">
     <h2>Daily Attendance - <span id="attendanceDate">{{ today|date:"F j, Y" }}</span></h2>
 </div>
-
+<div style="margin-bottom: 2rem;">
+    <form method="GET" action="{% url 'company:export_attendance_csv' %}">
+        <label for="month" style="margin-right: 1rem;">Select Month:</label>
+        <input type="month" id="month" name="month" required style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 4px;">
+        <button type="submit" class="btn btn-primary" style="margin-left: 1rem;">Export CSV</button>
+    </form>
+</div>
 <div class="card">
     <div class="card-body p-0">
         <form id="attendanceForm" method="post">
@@ -66,10 +74,12 @@
                     <tr>
                         <th>Employee</th>
                         <th>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="attendanceTableBody">
                     {% for employee in employees %}
+                    {% with attendance=employee.attendances_today %}
                     <tr>
                         <td>
                             <div class="employee-info">
@@ -81,17 +91,23 @@
                             </div>
                         </td>
                         <td>
-                            <select class="attendance-select form-select" name="attendance_{{ employee.id }}">
-                                <option value="Present" {% if attendance_data|default:employee.attendance == 'Present' %}selected{% endif %}>Present</option>
-                                <option value="Absent" {% if attendance_data|default:employee.attendance == 'Absent' %}selected{% endif %}>Absent</option>
-                                <option value="Late" {% if attendance_data|default:employee.attendance == 'Late' %}selected{% endif %}>Late</option>
-                                <option value="Half Day" {% if attendance_data|default:employee.attendance == 'Half Day' %}selected{% endif %}>Half Day</option>
+                            <select class="form-select attendance-select" data-id="{{ attendance.id|default:0 }}" {% if attendance and attendance.approved %}disabled{% endif %}>
+                                <option value="On Time" {% if attendance and attendance.attendance_type == "On Time" %}selected{% endif %}>On Time</option>
+                                <option value="Late" {% if attendance and attendance.attendance_type == "Late" %}selected{% endif %}>Late</option>
+                                <option value="Half Day" {% if attendance and attendance.attendance_type == "Half Day" %}selected{% endif %}>Half Day</option>
+                                <option value="Absent" {% if not attendance or attendance.attendance_type == "Absent" %}selected{% endif %}>Absent</option>
                             </select>
                         </td>
+                        <td>
+                            <button class="btn btn-success approve-btn" data-id="{{ attendance.id|default:0 }}" {% if attendance and attendance.approved %}disabled{% endif %}>
+                                {% if attendance and attendance.approved %}Approved{% else %}Approve{% endif %}
+                            </button>
+                        </td>
                     </tr>
+                    {% endwith %}
                     {% empty %}
                     <tr>
-                        <td colspan="2" class="text-center">No employees found.</td>
+                        <td colspan="3" class="text-center">No employees found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -102,42 +118,90 @@
         </form>
     </div>
 </div>
+
 <script>
+const csrftoken = document.querySelector('[name=csrf-token]').content;
+
+// Approve button logic
+document.querySelectorAll('.approve-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const attendanceId = this.dataset.id;
+
+        if (!attendanceId || attendanceId === "0") {
+            alert('Invalid attendance ID');
+            return;
+        }
+
+        const row = this.closest('tr');
+        const select = row.querySelector('.attendance-select');
+        const attendanceType = select.value;
+
+        fetch('{% url "company:update_attendance" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                'attendance_id': attendanceId,
+                'attendance_type': attendanceType
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('Attendance updated and approved!');
+                select.disabled = true;
+                this.disabled = true;
+                this.textContent = 'Approved';
+            } else {
+                alert('Error updating attendance: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(() => alert('Network error. Please try again.'));
+    });
+});
+
+// Attendance form submit logic
+document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch('{% url "company:update_attendance" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Attendance submitted successfully', 'success');
+            // disable all approved selects/buttons
+            document.querySelectorAll('.attendance-select, .approve-btn').forEach(el => el.disabled = true);
+        } else {
+            showNotification('Error submitting attendance: ' + (data.error || 'Unknown'), 'error');
+        }
+    })
+    .catch(() => showNotification('Network error, please try again', 'error'));
+});
+
+// Notification helper
 function showNotification(message, type = 'success') {
     const notification = document.getElementById('notification');
     notification.textContent = message;
-    notification.className = ''; // reset classes
+    notification.className = '';
     if (type === 'error' || type === 'danger') {
         notification.classList.add('error');
     }
     notification.style.display = 'block';
-
     setTimeout(() => {
         notification.style.display = 'none';
-    }, 3000);  // Hide after 3 seconds
+    }, 3000);
 }
-
-document.getElementById('attendanceForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    fetch('{% url "company:attendance" %}', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}'
-        },
-        body: new FormData(this)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showNotification('Attendance submitted successfully', 'success');
-        } else {
-            showNotification('Error submitting attendance', 'error');
-        }
-    })
-    .catch(() => {
-        showNotification('Network error, please try again', 'error');
-    });
-});
 </script>
 
 {% endblock %}

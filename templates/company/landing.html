@@ -9,21 +9,7 @@
 </head>
 <body class="font-poppins leading-normal text-gray-800 bg-gray-100">
     <!-- Header -->
-        {% if user.is_authenticated %}
-        {% if not company %}
-        <div class="form-card">
-            <h2>Create Your Company</h2>
-            <form method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="{{ form.name.id_for_label }}">Company Name</label>
-                    {{ form.name }}
-                </div>
-                <button type="submit" class="btn">Create Company</button>
-            </form>
-        </div>
-        {% endif %}
-    {% endif %}
+
     <header class="bg-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">

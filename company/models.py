@@ -2,19 +2,26 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils import timezone
+from datetime import date, timedelta
 
 class Company(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=200)
     owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,  # <-- change this
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='companies'
     )
-    first_login = models.DateTimeField(default=timezone.now) 
+    address = models.TextField(blank=True)
+    industry = models.CharField(max_length=100, blank=True)
+    company_size = models.CharField(max_length=20, blank=True)
+    website = models.URLField(blank=True)
 
+    first_login = models.DateTimeField(default=timezone.now)
     is_active = models.BooleanField(default=True)
+
     def __str__(self):
         return self.name
+    
 from datetime import date
 
 class Employee(models.Model):
@@ -117,9 +124,6 @@ class Attendance(models.Model):
     def __str__(self):
         return f"{self.employee.name} on {self.date} - {self.attendance_type or 'Not Recorded'}"
 
-    
-    
-
 class Leave(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
@@ -128,18 +132,26 @@ class Leave(models.Model):
     reason = models.TextField()
     status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')])
 
+class SubscriptionPlan(models.Model):
+    name = models.CharField(max_length=50)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
 class Subscription(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="subscriptions")
-    plan = models.CharField(
-        max_length=20,
-        choices=[('Free', 'Free'), ('Pro', 'Pro'), ('Enterprise', 'Enterprise')]
-    )
+    plan =models.ForeignKey(SubscriptionPlan, on_delete=models.CASCADE,related_name="subscriptions")
     active = models.BooleanField(default=True)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
+    def save(self, *args, **kwargs):
+        if not self.start_date:
+            self.start_date = date.today()
+        if not self.end_date:
+            self.end_date = self.start_date + timedelta(days=30)  # Default 1 month plan
+        super().save(*args, **kwargs)
+
 
     def __str__(self):
-        return f"{self.company.name} - {self.plan}"
+        return f"{self.company.name} - {self.plan.name}"
 
 
 
@@ -202,12 +214,19 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class AdminToHRNotification(models.Model):
-    hr_user = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'is_hr': True})
+class AdminToHRNotificationAdmin(models.Model):
+    company = models.ForeignKey('company.Company', on_delete=models.CASCADE, related_name='admin_to_hr_notifications')
     title = models.CharField(max_length=255)
     message = models.TextField()
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sent_notifications'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.title} to {self.hr_user}"
+        return f"{self.title} to {self.company.name}"
+
+

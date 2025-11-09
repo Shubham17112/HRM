@@ -3,14 +3,10 @@ from .models import (
     Company, Employee, EmployeeDocument, EmployeeBankDetail, EmployeeAadhaarDetail,
     AttendanceSettings, Attendance, Leave, Subscription, Notification, Holiday, NotificationRead
 )
-from company.models import AdminToHRNotification  # new model
+# from company.models import AdminToHRNotification  # new model
 
 # ------------------ Company ------------------
-@admin.register(Company)
-class CompanyAdmin(admin.ModelAdmin):
-    list_display = ('name', 'owner', 'is_active', 'first_login')
-    search_fields = ('name', 'owner__username')
-    list_filter = ('is_active',)
+
 
 # ------------------ Employee ------------------
 @admin.register(Employee)
@@ -58,12 +54,7 @@ class LeaveAdmin(admin.ModelAdmin):
     search_fields = ('employee__name', 'company__name', 'status')
     list_filter = ('status',)
 
-# ------------------ Subscription ------------------
-@admin.register(Subscription)
-class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('company', 'plan', 'active', 'start_date', 'end_date')
-    search_fields = ('company__name', 'plan')
-    list_filter = ('plan', 'active')
+
 
 # ------------------ Notification (HR → Employee) ------------------
 @admin.register(Notification)
@@ -87,8 +78,62 @@ class NotificationReadAdmin(admin.ModelAdmin):
     list_filter = ('read_at',)
 
 # ------------------ Admin → HR Notifications ------------------
-@admin.register(AdminToHRNotification)
+from django.contrib import admin
+from .models import AdminToHRNotificationAdmin
+
+@admin.register(AdminToHRNotificationAdmin)
 class AdminToHRNotificationAdmin(admin.ModelAdmin):
-    list_display = ('title', 'hr_user', 'created_at', 'is_read')
-    search_fields = ('title', 'hr_user__username')
+    list_display = ('title', 'company', 'created_by', 'created_at', 'is_read')
+    search_fields = ('title', 'company__name', 'created_by__username')
     list_filter = ('is_read', 'created_at')
+from django.contrib import admin
+from .models import SubscriptionPlan, Subscription, Company
+
+# ------------------ Subscription Plan ------------------
+@admin.register(SubscriptionPlan)
+class SubscriptionPlanAdmin(admin.ModelAdmin):
+    list_display = ('name', 'price')
+    search_fields = ('name',)
+    ordering = ('price', 'name')
+    list_per_page = 20
+
+    def __str__(self):
+        return self.name
+
+
+# ------------------ Subscription Inline for Company ------------------
+class SubscriptionInline(admin.TabularInline):
+    model = Subscription
+    extra = 0
+    readonly_fields = ('start_date', 'end_date')
+    autocomplete_fields = ('plan',)
+    show_change_link = True
+    can_delete = True
+
+
+# ------------------ Subscription ------------------
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('company', 'plan', 'active', 'start_date', 'end_date')
+    list_filter = ('active', 'plan')
+    search_fields = ('company__name', 'plan__name')
+    ordering = ('-start_date',)
+    date_hierarchy = 'start_date'
+    list_per_page = 25
+
+    def get_queryset(self, request):
+        """Show company & plan info efficiently"""
+        qs = super().get_queryset(request)
+        return qs.select_related('company', 'plan')
+
+    def __str__(self):
+        return f"{self.company.name} - {self.plan.name}"
+
+
+# ------------------ Company (with Subscriptions Inline) ------------------
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ('name', 'owner', 'is_active', 'first_login')
+    search_fields = ('name', 'owner__username')
+    list_filter = ('is_active',)
+    inlines = [SubscriptionInline]

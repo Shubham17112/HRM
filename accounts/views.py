@@ -6,20 +6,34 @@ from django.shortcuts import render, redirect
 from .forms import HRSignupForm, EmployeeSignupForm
 from django.contrib.auth import login
 
+from django.db import IntegrityError
+from django.contrib import messages
+
 def hr_signup(request):
+    print('hr singup fuction hit')
     if request.method == 'POST':
+        print('hr singup fuction hit')
         form = HRSignupForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            user.is_hr = True  # Mark as HR
-            user.save()
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect('company:dashboard')  # Or 'company:dashboard'
+            try:
+                user = form.save(commit=False)
+                user.is_hr = True
+                user.save()
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                return redirect('company:dashboard')
+            except IntegrityError:
+                print("Form errors:", form.errors)  # 👈 Add this line
+
+                messages.error(request, "A user with this email or username already exists.")
+                return render(request, 'accounts/signup_hr.html', {'form': form})
     else:
         form = HRSignupForm()
     return render(request, 'accounts/signup_hr.html', {'form': form})
 
+
 def employee_signup(request):
+    print('employee singup fuction hit')
+
     if request.method == 'POST':
         form = EmployeeSignupForm(request.POST)
         if form.is_valid():
@@ -42,6 +56,12 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def post_login_redirect(request):
+    user = request.user
+    print("🔍 User authenticated?", user.is_authenticated)
+    print("👤 Username:", user.username)
+    print("👔 HR:", user.is_hr, "👷 Employee:", user.is_employee)
+    print('post loign singup fuction hit')
+
     user = request.user
 
     # Send to employee dashboard

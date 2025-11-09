@@ -6,7 +6,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-#@)7skdk^es777@bv^pyjm1f2x-)71-t0sblhavtn8s%hc=@r9'
 
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+      'overgrateful-luniest-felisa.ngrok-free.dev',
+         'localhost',
+    '127.0.0.1',
+      ".ngrok-free.app",
+    ".ngrok-free.dev",
+]
 
 # -------------------
 # Installed Apps
@@ -20,7 +26,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-
+   
+ # or allow ngrok wildcard domains:
+  
     # Third-party
     'allauth',
     'allauth.account',
@@ -30,9 +38,23 @@ INSTALLED_APPS = [
     # Local apps
     'accounts',
     'company',
-     'self_signup',
-     'employee_portal',
+    'self_signup',
+    'employee_portal',
+    'payments',
+      'widget_tweaks',
 ]
+# settings.py
+CSRF_TRUSTED_ORIGINS = [
+    "https://overgrateful-luniest-felisa.ngrok-free.dev",
+    "https://*.ngrok-free.app",   # allow wildcard for convenience
+    "https://*.ngrok-free.dev",
+]
+# settings.py
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# settings.py
+
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 SITE_ID = 1
 
@@ -42,8 +64,8 @@ SITE_ID = 1
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',  # Default Django auth
-    'allauth.account.auth_backends.AuthenticationBackend',  # Allauth auth
+     'django.contrib.auth.backends.ModelBackend',  # Default Django auth
+    # 'allauth.account.auth_backends.AuthenticationBackend',  # Allauth auth
 ]
 
 # -------------------
@@ -151,6 +173,8 @@ STATIC_URL = 'static/'
 # Default Primary Key
 # -------------------
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-]
+
+
+RAZORPAY_KEY_ID = "rzp_test_RRhqTWeNC1il5O"
+RAZORPAY_KEY_SECRET = "jMmnfPNl1hkXpLc7SHtJWjO0"
+INSTALLED_APPS += ['django_extensions']

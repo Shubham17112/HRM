@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRFlow - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="font-poppins leading-normal text-gray-800 bg-gray-100">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'company:company_home' %}" class="flex items-center space-x-3">
+                        <svg class="w-8 h-8 text-teal-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="m22 21-3-3m0 0a5.5 5.5 0 1 0-7.8-7.8 5.5 5.5 0 0 0 7.8 7.8Z"/>
+                        </svg>
+                    </a>
+                    <a href="{% url 'company:company_home' %}" class="flex items-center space-x-3">
+                    <span class="text-2xl font-bold text-gray-900">HRFlow</span></a>
+                </div>
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="{% url 'accounts:hr_signup' %}" class="text-gray-900 font-medium hover:text-teal-500">Signup</a>
+                </div>
+            </div>
+        </div>
+    </header>
+{% block content %}
+
+{% endblock %}

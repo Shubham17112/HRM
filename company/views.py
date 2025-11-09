@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
-from .models import Employee, Attendance, Leave, Subscription, Company
+from .models import Employee, Attendance, Leave, Subscription, Company, AdminToHRNotificationAdmin
 from django import forms
 from django.utils import timezone
 from .forms import CompanyForm
@@ -13,7 +13,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from datetime import datetime, timedelta
 import calendar
-from .models import Employee, Attendance, Leave, Subscription, Company, Notification, Holiday, NotificationRead
+from .models import Employee, Attendance, Leave, Subscription, Company, Notification, Holiday, NotificationRead, SubscriptionPlan
 
 
 class EmployeeForm(forms.ModelForm):
@@ -31,18 +31,27 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.db.models import Count, Q
 from .models import Employee, Attendance, Leave, Notification, Holiday
-from company.models import AdminToHRNotification
+from company.models import AdminToHRNotificationAdmin
 
 @login_required
 def dashboard(request):
     user = request.user
-    admin_notifications = AdminToHRNotification.objects.filter(hr_user=user).order_by('-created_at')
-    
-    print('admin_notifications:', admin_notifications)
     # If user is employee, redirect to employee dashboard
     if hasattr(user, 'employee'):
         return redirect('employee_portal:employee_dashboard')
-
+    try:
+        
+        company = user.companies.first()  # if multiple, you may adjust logic
+        print('inside the try block of dashboard')
+    except Company.DoesNotExist:
+        return HttpResponseForbidden("You are not authorized to view this page.")
+    
+    company = getattr(user, 'name', None)
+    if not company:
+        return redirect("accounts:hr_signup")
+        
+    admin_notifications = company.admin_to_hr_notifications.all().order_by('-created_at')
+    print('admin_notifications:', admin_notifications)
     # If user is HR (has a company), show HR dashboard
     company = user.companies.first()
     if company:
@@ -323,13 +332,15 @@ def subscription(request):
     company = request.user.companies.first()
     if not company:
         return redirect('company:company_home')
-    subscription = Subscription.objects.filter(company=company, active=True).first()
-    plans = [
-        {'name': 'Free', 'price': '$0', 'features': ['Up to 10 employees', 'Basic support']},
-        {'name': 'Pro', 'price': '$99/month', 'features': ['Up to 50 employees', 'Priority support', 'Advanced reporting']},
-        {'name': 'Enterprise', 'price': 'Contact us', 'features': ['Unlimited employees', 'Dedicated support', 'Custom integrations']},
-    ]
-    return render(request, 'company/subscription.html', {'subscription': subscription, 'plans': plans})
+
+    # check active subscription
+    active_subscription = Subscription.objects.filter(company=company, active=True).first()
+
+    plans = SubscriptionPlan.objects.all()
+    return render(request, "company/subscription.html", {
+        "plans": plans,
+        "active_subscription": active_subscription
+    })
 
 def logout(request):
     auth_logout(request)

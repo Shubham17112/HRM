@@ -9,10 +9,12 @@ class CompanyForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'placeholder': 'Enter company name'}),
         }
 
+
 class EmployeeForm(forms.ModelForm):
     class Meta:
         model = Employee
         fields = ['name', 'email', 'phone', 'position',  'employment_status', 'leaving_reason', 'leaving_date']
+
 class FireEmployeeForm(forms.ModelForm):
     class Meta:
         model = Employee

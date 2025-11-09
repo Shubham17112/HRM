@@ -10,36 +10,48 @@
         margin-bottom: 3rem;
     }
 
+    .subscription-header h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .subscription-header p {
+        color: #64748b;
+        font-size: 1rem;
+    }
+
     .plan-card {
+        background-color: #fff;
         border: 2px solid #e2e8f0;
         border-radius: 1rem;
         padding: 2rem;
         position: relative;
         transition: all 0.3s ease;
+        height: 100%;
     }
 
     .plan-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        transform: translateY(-6px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
     }
 
     .plan-card.popular {
-        border-color: #14b8a6;
-        transform: scale(1.05);
-        box-shadow: 0 10px 30px rgba(20, 184, 166, 0.2);
+        border-color: #0ea5e9;
+        box-shadow: 0 10px 35px rgba(14, 165, 233, 0.25);
     }
 
     .popular-badge {
         position: absolute;
         top: -12px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #14b8a6;
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
+        right: 20px;
+        background-color: #0ea5e9;
+        color: #fff;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.85rem;
         font-weight: 600;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 6px rgba(14, 165, 233, 0.3);
     }
 
     .plan-price {
@@ -47,10 +59,11 @@
         align-items: baseline;
         justify-content: center;
         gap: 0.25rem;
+        margin-top: 0.75rem;
     }
 
     .price {
-        font-size: 3rem;
+        font-size: 2.5rem;
         font-weight: 700;
         color: #1e293b;
     }
@@ -60,47 +73,89 @@
         color: #64748b;
     }
 
+    .plan-features {
+        margin-top: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .plan-features li {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #334155;
+        padding: 0.4rem 0;
+        font-size: 0.95rem;
+    }
+
     .plan-features svg {
-        width: 1.25rem;
-        height: 1.25rem;
-        color: #14b8a6;
-        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        stroke: #10b981;
+    }
+
+    .btn-primary {
+        background-color: #0ea5e9;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0284c7;
+    }
+
+    .btn-outline-primary {
+        border-color: #0ea5e9;
+        color: #0ea5e9;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #0ea5e9;
+        color: #fff;
     }
 </style>
 
 <div class="subscription-header">
-    <h2 class="h3">Choose Your Plan</h2>
-    <p class="text-muted">Select the perfect plan for your organization</p>
+    <h2>Choose Your Plan</h2>
+    <p>Select the perfect plan for your organization</p>
 </div>
 
 <div class="row g-4">
     {% for plan in plans %}
-    <div class="col-12 col-lg-4">
-        <div class="plan-card {% if plan.popular %}popular{% endif %}">
-            {% if plan.popular %}
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="plan-card {% if forloop.first %}popular{% endif %}">
+            {% if forloop.first %}
             <div class="popular-badge">Most Popular</div>
             {% endif %}
             <div class="text-center mb-4">
-                <h3>{{ plan.name }}</h3>
+                <h3 class="fw-semibold">{{ plan.name }}</h3>
                 <div class="plan-price">
-                    <span class="price">${{ plan.price }}</span>
+                    <span class="price">₹{{ plan.price }}</span>
                     <span class="period">/month</span>
                 </div>
             </div>
-            <ul class="list-unstyled plan-features mb-4">
-                {% for feature in plan.features %}
-                <li class="d-flex align-items-center gap-3 py-2">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                        <polyline points="22,4 12,14.01 9,11.01"/>
+            <ul class="list-unstyled plan-features">
+                <li>
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 4 12 14 9 11"></polyline>
                     </svg>
-                    {{ feature }}
+                    Plan for {{ plan.name }} users
                 </li>
-                {% endfor %}
+                <li>
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 4 12 14 9 11"></polyline>
+                    </svg>
+                    24/7 Support
+                </li>
+                <li>
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 4 12 14 9 11"></polyline>
+                    </svg>
+                    Access to all features
+                </li>
             </ul>
-            <button class="btn w-100 {% if plan.current %}btn-outline-secondary{% elif plan.popular %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                {{ plan.button_text }}
-            </button>
+            <a href="{% url 'subcription:create_order' plan.id %}" 
+               class="btn w-100 {% if forloop.first %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                Subscribe
+            </a>
         </div>
     </div>
     {% endfor %}

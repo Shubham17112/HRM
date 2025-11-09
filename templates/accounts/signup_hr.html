@@ -1,6 +1,124 @@
-<h2>HR Signup</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Sign Up</button>
-</form>
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100 py-16">
+    <div class="max-w-lg w-full bg-white shadow-xl rounded-2xl p-8">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Create Your HR Account</h2>
+            <p class="text-gray-500">Manage your company and employees with ease</p>
+        </div>
+
+        <form id="hrSignupForm" method="post" novalidate>
+            {% csrf_token %}
+
+            <!-- STEP 1: Company Info -->
+            <div class="form-step" id="step1">
+                <h3 class="text-xl font-semibold text-teal-600 mb-4">Step 1 — Company Info</h3>
+                <div class="space-y-5">
+                    {% for field in form %}
+                        {% if field.name in "company_name address industry company_size website" %}
+                        <div>
+                            <label class="block mb-1 text-gray-700 font-medium">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ field.errors|striptags }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="flex justify-end mt-6">
+                    <button type="button" onclick="nextStep()" class="bg-teal-500 text-white px-5 py-2 rounded-lg hover:bg-teal-600 transition">
+                        Next →
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: HR Contact -->
+            <div class="form-step hidden" id="step2">
+                <h3 class="text-xl font-semibold text-teal-600 mb-4">Step 2 — HR Contact</h3>
+                <div class="space-y-5">
+                    {% for field in form %}
+                        {% if field.name in "first_name last_name email phone" %}
+                        <div>
+                            <label class="block mb-1 text-gray-700 font-medium">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ field.errors|striptags }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="flex justify-between mt-6">
+                    <button type="button" onclick="prevStep()" class="bg-gray-300 px-5 py-2 rounded-lg hover:bg-gray-400 transition">
+                        ← Back
+                    </button>
+                    <button type="button" onclick="nextStep()" class="bg-teal-500 text-white px-5 py-2 rounded-lg hover:bg-teal-600 transition">
+                        Next →
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Account Setup -->
+            <div class="form-step hidden" id="step3">
+                <h3 class="text-xl font-semibold text-teal-600 mb-4">Step 3 — Account Setup</h3>
+                <div class="space-y-5">
+                    {% for field in form %}
+                        {% if field.name in "password confirm_password accept_terms" %}
+                        <div>
+                            <label class="block mb-1 text-gray-700 font-medium">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ field.errors|striptags }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="flex justify-between mt-6">
+                    <button type="button" onclick="prevStep()" class="bg-gray-300 px-5 py-2 rounded-lg hover:bg-gray-400 transition">
+                        ← Back
+                    </button>
+                    <button type="submit" class="bg-teal-500 text-white px-5 py-2 rounded-lg hover:bg-teal-600 transition">
+                        Create Account
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <hr class="my-6">
+        <p class="text-center text-gray-600 text-sm">
+            Already have an account?
+            <a href="{% url 'accounts:login' %}" class="text-teal-500 font-semibold hover:underline">Login here</a>
+        </p>
+    </div>
+</section>
+
+<script>
+let currentStep = 1;
+const totalSteps = 3;
+
+function showStep(step) {
+    document.querySelectorAll('.form-step').forEach(div => div.classList.add('hidden'));
+    document.getElementById(`step${step}`).classList.remove('hidden');
+}
+
+function nextStep() {
+    if (currentStep < totalSteps) {
+        currentStep++;
+        showStep(currentStep);
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => showStep(currentStep));
+</script>
+{% endblock %}

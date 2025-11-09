@@ -24,4 +24,8 @@ urlpatterns = [
     path('accounts/', include(('accounts.urls', 'accounts'), namespace='accounts')),
 path('self-signup/', include(('self_signup.urls', 'self_signup'), namespace='self_signup')),
     
-    path('employee/', include('employee_portal.urls')),]
+    path('employee/', include('employee_portal.urls')),
+    path('payments/',include('payments.urls'))
+    
+    
+    ]

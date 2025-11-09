@@ -272,20 +272,28 @@
     <div class="col-md-8">
         <div class="holiday-list">
             <h3 style="margin-bottom: 1.5rem;">Holidays for {{ current_year }}</h3>
-            {% for holiday in holidays %}
-            <div class="holiday-item">
-                <div style="flex: 1;">
-                    <h5 style="margin-bottom: 0.25rem;">{{ holiday.name }}</h5>
-                    <p style="margin-bottom: 0.25rem; color: #6b7280; font-size: 0.875rem;">{{ holiday.date|date:"F j, Y" }} ({{ holiday.date|date:"l" }})</p>
-                    {% if holiday.description %}
-                    <p style="margin-bottom: 0; color: #9ca3af; font-size: 0.75rem;">{{ holiday.description }}</p>
-                    {% endif %}
-                </div>
-                <span class="holiday-badge {{ holiday.holiday_type }}">{{ holiday.get_holiday_type_display }}</span>
+            {% for holiday in holidays_qs %}
+        <div class="holiday-item" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="flex: 1;">
+                <h5 style="margin-bottom: 0.25rem;">{{ holiday.name }}</h5>
+                <p style="margin-bottom: 0.25rem; color: #6b7280; font-size: 0.875rem;">
+                    {{ holiday.date|date:"F j, Y" }} ({{ holiday.date|date:"l" }})
+                </p>
+                {% if holiday.description %}
+                <p style="margin-bottom: 0; color: #9ca3af; font-size: 0.75rem;">{{ holiday.description }}</p>
+                {% endif %}
             </div>
-            {% empty %}
-            <p style="text-align: center; color: #6b7280;">No holidays added yet.</p>
-            {% endfor %}
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="holiday-badge {{ holiday.holiday_type }}">{{ holiday.get_holiday_type_display }}</span>
+                <a href="{% url 'company:edit_holiday' holiday.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                <form action="{% url 'company:delete_holiday' holiday.id %}" method="POST" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this holiday?');">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+
         </div>
     </div>
     
@@ -294,11 +302,11 @@
             <h3 style="margin-bottom: 1.5rem;">Quick Stats</h3>
             <div style="text-align: center;">
                 <div style="margin-bottom: 1rem;">
-                    <div style="font-size: 2rem; font-weight: 700; color: #14b8a6;">{{ holidays.count }}</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: #14b8a6;">{{ holidays_qs.count }}</div>
                     <div style="color: #6b7280;">Total Holidays</div>
                 </div>
                 <div style="margin-bottom: 1rem;">
-                    <div style="font-size: 2rem; font-weight: 700; color: #f59e0b;">{{ holidays|length }}</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: #f59e0b;">{{ holidays_qs|length }}</div>
                     <div style="color: #6b7280;">Working Days</div>
                 </div>
                 <div>
@@ -312,120 +320,104 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-console.log("Calendar script loaded");
+    console.log("Calendar script loaded");
 
-const calendarDisplay = document.getElementById('calendar-display');
-if (!calendarDisplay) {
-    console.error("calendar-display element not found");
-} else {
-    calendarDisplay.innerHTML = "<p>Calendar placeholder</p>";
-}
-});
-const holidays = {{ holidays|safe }};
-const attendanceMap = {{ attendance_map|safe }};
-const currentYear = {{ current_year }};
+    // --- Parse JSON data safely ---
+    const holidays = JSON.parse('{{ holidays_json|escapejs }}');
+    const attendanceMap = JSON.parse('{{ attendance_json|escapejs }}');
+    const currentYear = {{ current_year }};
 
-// Convert holidays to a more usable format
-const holidayMap = {};
-{% for holiday in holidays %}
-holidayMap['{{ holiday.date|date:"Y-m-d" }}'] = {
-    name: '{{ holiday.name|escapejs }}',
-    type: '{{ holiday.holiday_type }}',
-    description: '{{ holiday.description|escapejs }}'
-};
-{% endfor %}
-function generateCalendar(year, month = null) {
-    const calendarDisplay = document.getElementById('calendar-display');
-    const months = [
-        'January','February','March','April','May','June',
-        'July','August','September','October','November','December'
-    ];
-    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    console.log("Parsed holidays:", holidays);
+    console.log("Parsed attendance:", attendanceMap);
 
-    let html = '';
+    // --- Build holiday map from parsed data ---
+    const holidayMap = {};
+    for (const h of holidays) {
+        holidayMap[h.date] = {
+            name: h.name,
+            type: h.holiday_type,
+            description: h.description
+        };
+    }
+    console.log("Holiday map ready:", holidayMap);
 
-    // If month is null, show all 12
-    const startMonth = month === null ? 0 : month;
-    const endMonth = month === null ? 11 : month;
+    // --- Generate calendar ---
+    function generateCalendar(year, month = null) {
+        const calendarDisplay = document.getElementById('calendar-display');
+        const months = [
+            'January','February','March','April','May','June',
+            'July','August','September','October','November','December'
+        ];
+        const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-    for (let m = startMonth; m <= endMonth; m++) {
-        html += `<div style="margin-bottom: 2rem;">`;
-        html += `<h4 style="margin-bottom: 1rem; color: #1f2937;">${months[m]} ${year}</h4>`;
+        let html = '';
+        const startMonth = month === null ? 0 : month;
+        const endMonth = month === null ? 11 : month;
 
-        html += `<div class="calendar-grid">`;
-        dayNames.forEach(day => {
-            html += `<div class="calendar-header">${day}</div>`;
-        });
+        for (let m = startMonth; m <= endMonth; m++) {
+            html += `<div style="margin-bottom: 2rem;">`;
+            html += `<h4 style="margin-bottom: 1rem; color: #1f2937;">${months[m]} ${year}</h4>`;
+            html += `<div class="calendar-grid">`;
 
-        const firstDay = new Date(year, m, 1).getDay();
-        const daysInMonth = new Date(year, m + 1, 0).getDate();
+            dayNames.forEach(day => {
+                html += `<div class="calendar-header">${day}</div>`;
+            });
 
-        for (let i = 0; i < firstDay; i++) {
-            html += `<div class="calendar-day"></div>`;
-        }
+            const firstDay = new Date(year, m, 1).getDay();
+            const daysInMonth = new Date(year, m + 1, 0).getDate();
 
-        for (let day = 1; day <= daysInMonth; day++) {
-            const date = new Date(year, m, day);
-            const dateStr = date.toISOString().split('T')[0];
-            const isSunday = date.getDay() === 0;
-            const holiday = holidayMap[dateStr];
-            const attendance = attendanceMap[dateStr];
-
-            let classes = ['calendar-day'];
-            let content = `<div class="day-number">${day}</div>`;
-
-            if (isSunday) {
-                classes.push('sunday');
-                content += `<div class="holiday-name" style="background: rgba(220, 38, 38, 0.1);">Sunday</div>`;
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div class="calendar-day"></div>`;
             }
 
-            if (holiday) {
-                if (holiday.type === 'national') {
-                    classes.push('national-holiday');
-                } else {
-                    classes.push('holiday');
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, m, day);
+                const dateStr = date.toISOString().split('T')[0];
+                const isSunday = date.getDay() === 0;
+                const holiday = holidayMap[dateStr];
+                const attendance = attendanceMap[dateStr];
+
+                let classes = ['calendar-day'];
+                let content = `<div class="day-number">${day}</div>`;
+
+                if (isSunday) {
+                    classes.push('sunday');
+                    content += `<div class="holiday-name" style="background: rgba(220, 38, 38, 0.1);">Sunday</div>`;
                 }
-                content += `<div class="holiday-name">${holiday.name}</div>`;
+
+                if (holiday) {
+                    classes.push(holiday.type === 'national' ? 'national-holiday' : 'holiday');
+                    content += `<div class="holiday-name">${holiday.name}</div>`;
+                    if (holiday.description) {
+                        content += `<div class="holiday-desc" style="font-size: 0.75rem; color: #6b7280;">${holiday.description}</div>`;
+                    }
+                }
+
+                if (attendance) {
+                    classes.push(attendance.toLowerCase().replace(" ", "-"));
+                    content += `<div class="attendance-name">${attendance}</div>`;
+                }
+
+                html += `<div class="${classes.join(' ')}" data-date="${dateStr}">${content}</div>`;
             }
 
-            if (attendance) {
-                classes.push(attendance.toLowerCase().replace(" ", "-"));
-                content += `<div class="attendance-name">${attendance}</div>`;
-            }
-
-            html += `<div class="${classes.join(' ')}" data-date="${dateStr}">${content}</div>`;
+            html += `</div></div>`;
         }
 
-        html += `</div></div>`;
+        calendarDisplay.innerHTML = html;
     }
 
-    calendarDisplay.innerHTML = html;
-}
+    // --- Hook month selector ---
+    function changeMonth() {
+        const selectedMonth = parseInt(document.getElementById('month-select').value);
+        generateCalendar(currentYear, selectedMonth);
+    }
 
-// Hook month selector
-function changeMonth() {
-    const selectedMonth = parseInt(document.getElementById('month-select').value);
-    generateCalendar(currentYear, selectedMonth);
-}
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    generateCalendar(currentYear,new Date().getMonth());
-    
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.calendar-day')) {
-            const day = e.target.closest('.calendar-day');
-            const date = day.dataset.date;
-            if (date && !holidayMap[date]) {
-                const holidayName = prompt('Enter holiday name for ' + date + ':');
-                if (holidayName) {
-                    console.log('Adding holiday:', holidayName, 'on', date);
-                }
-            }
-        }
-    });
+    // --- Run calendar once page is ready ---
+    generateCalendar(currentYear, new Date().getMonth());
 });
 </script>
+
 
 
 {% endblock %}

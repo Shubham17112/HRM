@@ -17,7 +17,7 @@
                 <h3 class="text-xl font-semibold text-teal-600 mb-4">Step 1 — Company Info</h3>
                 <div class="space-y-5">
                     {% for field in form %}
-                        {% if field.name in "company_name address industry company_size website" %}
+                        {% if field.name in "name address industry company_size website" %}
                         <div>
                             <label class="block mb-1 text-gray-700 font-medium">{{ field.label }}</label>
                             {{ field }}
@@ -61,9 +61,36 @@
                 </div>
             </div>
 
-            <!-- STEP 3: Account Setup -->
+            <!-- STEP 3: Attendance Settings -->
             <div class="form-step hidden" id="step3">
-                <h3 class="text-xl font-semibold text-teal-600 mb-4">Step 3 — Account Setup</h3>
+                <h3 class="text-xl font-semibold text-teal-600 mb-4">Step 3 — Attendance Settings</h3>
+                <p class="text-gray-500 mb-4">Configure your company’s working hour policies.</p>
+                <div class="space-y-5">
+                    {% for field in form %}
+                        {% if field.name in "shift_start_time late_grace_period_minutes half_day_cutoff_time" %}
+                        <div>
+                            <label class="block mb-1 text-gray-700 font-medium">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ field.errors|striptags }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="flex justify-between mt-6">
+                    <button type="button" onclick="prevStep()" class="bg-gray-300 px-5 py-2 rounded-lg hover:bg-gray-400 transition">
+                        ← Back
+                    </button>
+                    <button type="button" onclick="nextStep()" class="bg-teal-500 text-white px-5 py-2 rounded-lg hover:bg-teal-600 transition">
+                        Next →
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 4: Account Setup -->
+            <div class="form-step hidden" id="step4">
+                <h3 class="text-xl font-semibold text-teal-600 mb-4">Step 4 — Account Setup</h3>
                 <div class="space-y-5">
                     {% for field in form %}
                         {% if field.name in "password confirm_password accept_terms" %}
@@ -98,7 +125,7 @@
 
 <script>
 let currentStep = 1;
-const totalSteps = 3;
+const totalSteps = 4;  // ✅ Now we have 4 steps
 
 function showStep(step) {
     document.querySelectorAll('.form-step').forEach(div => div.classList.add('hidden'));

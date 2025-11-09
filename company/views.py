@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import user_passes_test
+from datetime import date
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -11,9 +12,10 @@ from .forms import CompanyForm
 from django.db.models import Count, Q
 from django.contrib import messages
 from django.http import JsonResponse
-from datetime import datetime, timedelta
+
 import calendar
 from .models import Employee, Attendance, Leave, Subscription, Company, Notification, Holiday, NotificationRead, SubscriptionPlan
+from datetime import datetime
 
 
 class EmployeeForm(forms.ModelForm):
@@ -32,7 +34,7 @@ from django.utils import timezone
 from django.db.models import Count, Q
 from .models import Employee, Attendance, Leave, Notification, Holiday
 from company.models import AdminToHRNotificationAdmin
-
+from datetime import datetime, timedelta
 @login_required
 def dashboard(request):
     user = request.user
@@ -46,9 +48,9 @@ def dashboard(request):
     except Company.DoesNotExist:
         return HttpResponseForbidden("You are not authorized to view this page.")
     
-    company = getattr(user, 'name', None)
-    if not company:
-        return redirect("accounts:hr_signup")
+    # company = getattr(user, 'name', None)
+    # if not company:
+    #     return redirect("accounts:hr_signup")
         
     admin_notifications = company.admin_to_hr_notifications.all().order_by('-created_at')
     print('admin_notifications:', admin_notifications)
@@ -264,27 +266,66 @@ def employee_detail(request, employee_id):
     return render(request, 'company/employee_detail.html', context)
 from django.http import JsonResponse
 
-
 def attendance(request):
-    company = request.user.companies.first()
+    """Render and update daily attendance for all employees."""
+
+    # ✅ Detect company (for HR or Owner user)
+    company = None
+    if hasattr(request.user, 'employee'):
+        company = request.user.employee.company
+    elif hasattr(request.user, 'companies'):
+        company = request.user.companies.first()
 
     if not company:
         return JsonResponse({'success': False, 'message': 'No company found'}, status=400)
 
-    employees = Employee.objects.filter(company=company)
+    today = date.today()
+    employees = Employee.objects.filter(company=company, is_active=True)
 
+    # ✅ Ensure every employee has a record for today (default = Absent)
+    for emp in employees:
+        Attendance.objects.get_or_create(
+            employee=emp,
+            date=today,
+            defaults={'attendance_type': 'Absent'}
+        )
+
+    # ✅ Handle POST requests
     if request.method == 'POST':
-        for employee in employees:
-            status = request.POST.get(f'attendance_{employee.id}')  # match your input names
-            if status:
-                Attendance.objects.update_or_create(
-                    employee=employee,
-                    date=timezone.now().date(),
-                    defaults={'attendance_type': status}
-                )
-        return JsonResponse({'success': True})
+        try:
+            # Handle AJAX JSON (Approve button)
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+                attendance_id = data.get('attendance_id')
+                attendance_type = data.get('attendance_type')
 
-    return render(request, 'company/attendance.html', {'employees': employees, 'today': timezone.now().date()})
+                attendance = Attendance.objects.get(id=attendance_id)
+                attendance.attendance_type = attendance_type
+                attendance.approved = True
+                attendance.save()
+
+                return JsonResponse({'success': True})
+
+            # Handle standard form POST (Submit Attendance button)
+            else:
+                for emp in employees:
+                    status = request.POST.get(f'attendance_{emp.id}')
+                    if status:
+                        Attendance.objects.update_or_create(
+                            employee=emp,
+                            date=today,
+                            defaults={'attendance_type': status}
+                        )
+                return JsonResponse({'success': True})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+    # ✅ Render template for GET requests
+    return render(request, 'company/attendance.html', {
+        'employees': employees,
+        'today': today,
+    })
 
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -435,8 +476,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Holiday
-import datetime
 
+from datetime import date
 
 
 @login_required
@@ -445,57 +486,62 @@ def holiday_calendar(request):
     if not company:
         return redirect('company:company_home')
     
-    if request.method == 'POST':
-        if 'add_holiday' in request.POST:
-            name = request.POST.get('holiday_name')
-            date = request.POST.get('holiday_date')
-            holiday_type = request.POST.get('holiday_type', 'company')
-            description = request.POST.get('description', '')
+    # --- Add new holiday ---
+    if request.method == 'POST' and 'add_holiday' in request.POST:
+        name = request.POST.get('holiday_name')
+        holida_date = request.POST.get('holiday_date')
+        holiday_type = request.POST.get('holiday_type', 'company')
+        description = request.POST.get('description', '')
 
-            if name and date:
-                Holiday.objects.create(
-                    company=company,
-                    name=name,
-                    date=date,
-                    holiday_type=holiday_type,
-                    description=description
-                )
-                messages.success(request, 'Holiday added successfully!')
-
+        if name and holida_date:
+            date_obj = datetime.strptime(holida_date, "%Y-%m-%d").date()
+            Holiday.objects.create(
+                company=company,
+                name=name,
+                date=date_obj,
+                holiday_type=holiday_type,
+                description=description
+            )
+            messages.success(request, 'Holiday added successfully!')
         return redirect('company:holiday_calendar')
 
-    # GET request: fetch holidays and pass to template
+    # --- Fetch holidays ---
     holidays_qs = Holiday.objects.filter(company=company)
-    holidays = []
-    for h in holidays_qs:
-        holidays.append({
+    holidays_json_list = [
+        {
             'date': h.date.strftime('%Y-%m-%d'),
             'name': h.name,
             'holiday_type': h.holiday_type,
             'description': h.description or ''
-        })
+        }
+        for h in holidays_qs
+    ]
 
-    # Prepare attendance map
-    current_year = datetime.date.today().year
-    start_date = datetime.date(current_year, 1, 1)
-    end_date = datetime.date(current_year, 12, 31)
-
+    # --- Attendance map ---
+    current_year = date.today().year
+    start_date = date(current_year, 1, 1)
+    end_date = date(current_year, 12, 31)
     attendances = Attendance.objects.filter(
         employee__company=company,
         date__range=(start_date, end_date)
     )
 
-    attendance_map = {}
-    for att in attendances:
-        attendance_map[att.date.strftime('%Y-%m-%d')] = att.attendance_type
+    attendance_map = {
+        att.date.strftime('%Y-%m-%d'): att.attendance_type
+        for att in attendances
+    }
 
+    print('attendance map', attendance_map)
+    print('holidays map', holidays_json_list)
+
+    # --- Render ---
     return render(request, 'company/holiday_calendar.html', {
-        'holidays': holidays,                 # List of holiday dicts
-        'attendance_map': attendance_map,     # Dictionary for attendance by date
+        'holidays_qs': holidays_qs,  # ✅ for Django template rendering
+        'holidays_json': json.dumps(holidays_json_list),  # ✅ for JS calendar
+        'attendance_json': json.dumps(attendance_map),
         'current_year': current_year,
         'company': company,
     })
-
 
 def create_default_indian_holidays(company, year):
     """Create default Indian holidays for the year"""
@@ -550,7 +596,44 @@ def get_calendar_data(request):
         'holidays': holiday_list,
         'sundays': get_sundays_in_month(int(year), int(month))
     })
+@login_required
+def edit_holiday(request, holiday_id):
+    """Edit an existing holiday"""
+    company = request.user.companies.first()
+    holiday = get_object_or_404(Holiday, id=holiday_id, company=company)
 
+    if request.method == 'POST':
+        name = request.POST.get('holiday_name')
+        holiday_type = request.POST.get('holiday_type')
+        description = request.POST.get('description', '')
+        holiday_date = request.POST.get('holiday_date')
+
+        if name and holiday_date:
+            holiday.name = name
+            holiday.holiday_type = holiday_type
+            holiday.description = description
+            holiday.date = datetime.strptime(holiday_date, "%Y-%m-%d").date()
+            holiday.save()
+            messages.success(request, 'Holiday updated successfully!')
+            return redirect('company:holiday_calendar')
+
+    return render(request, 'company/edit_holiday.html', {
+        'holiday': holiday,
+    })
+
+
+@login_required
+def delete_holiday(request, holiday_id):
+    """Delete a holiday"""
+    company = request.user.companies.first()
+    holiday = get_object_or_404(Holiday, id=holiday_id, company=company)
+
+    if request.method == 'POST':
+        holiday.delete()
+        messages.success(request, f'Holiday "{holiday.name}" deleted successfully!')
+        return redirect('company:holiday_calendar')
+
+    return render(request, 'company/delete_confirm.html', {'holiday': holiday})
 def get_sundays_in_month(year, month):
     """Get all Sundays in a given month"""
     sundays = []
@@ -627,6 +710,7 @@ def update_attendance(request):
 from django.http import HttpResponse, HttpResponseForbidden
 import csv
 from datetime import date
+from datetime import datetime
 
 @login_required
 def export_attendance_csv(request):

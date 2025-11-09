@@ -23,6 +23,8 @@ urlpatterns = [
     #
     path('employee/<int:employee_id>/fire/', views.fire_employee, name='fire_employee'),
     path('holiday-calendar/', views.holiday_calendar, name='holiday_calendar'),
+      path('holiday/<int:holiday_id>/edit/', views.edit_holiday, name='edit_holiday'),
+    path('holiday/<int:holiday_id>/delete/', views.delete_holiday, name='delete_holiday'),
 
 
 

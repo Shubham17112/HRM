@@ -137,7 +137,7 @@ document.querySelectorAll('.approve-btn').forEach(btn => {
         const select = row.querySelector('.attendance-select');
         const attendanceType = select.value;
 
-        fetch('{% url "company:update_attendance" %}', {
+        fetch('{% url "company:attendance" %}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -169,7 +169,7 @@ document.getElementById('attendanceForm').addEventListener('submit', function(e)
 
     const formData = new FormData(this);
 
-    fetch('{% url "company:update_attendance" %}', {
+    fetch('{% url "company:attendance" %}', {
         method: 'POST',
         headers: {
             'X-CSRFToken': csrftoken
